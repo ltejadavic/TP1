@@ -1,0 +1,237 @@
+.gradient-custom-2 {
+    background: linear-gradient(to right, #000, #333);
+}
+
+.sidebar {
+    background-color: #fff;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+}
+
+.module-item {
+    color: #000;
+    background-color: #fff;
+    border: none;
+    text-align: left;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.module-item:hover, .module-item:focus {
+    background-color: #ff4500;
+    color: #fff;
+}
+
+.action-list {
+    display: none;
+    list-style-type: none;
+    padding: 0;
+}
+
+.action-item {
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.action-item:hover {
+    background-color: #eee;
+}
+
+.action-item.active {
+    background-color: #ff4500;
+    color: #fff;
+}
+
+.menu-hamburger {
+    font-size: 28px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.menu-hamburger:hover {
+    color: #ff4500;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 10px;
+    top: 60px;
+    background-color: #f6f6f6;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.titulo-verde {
+    color: #33ff33;
+}
+
+.workspace {
+    background-color: #f7f7f7;
+    padding: 20px;
+}
+
+.logo-small {
+    width: 40px;
+    height: auto;
+}
+
+.active-module {
+    display: block;
+}
+
+/* Especificaciones para la tarjeta de login */
+.login-card {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Botón específico para login */
+.btn-login-login {
+    background-color: #ff4500;
+    border-color: #ff4500;
+    padding: 10px 20px;
+    border-radius: 50px;
+    transition: background-color 0.3s ease;
+    color: #fff;
+}
+
+.btn-login-login:hover {
+    background-color: #d63a00;
+}
+
+/* Enlace específico para login */
+.forgot-password-login,
+.forgot-password-login:hover {
+    color: #33ff33;
+}
+
+.module-header {
+    width: 100%;
+    text-align: left;
+    background-color: transparent;
+    border: none;
+    font-weight: bold;
+    padding: 10px 15px;
+    color: black;
+}
+
+.module-header:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.action-item.active {
+    background-color: #ff4500;
+    color: white;
+}
+
+.container-fluid {
+    padding: 0;  /* Asegura que no hayan espacios adicionales */
+}
+
+.sidebar-bg {
+    border: none;  /* Remueve los bordes */
+    background-color: #ffffff;  /* Fondo blanco */
+    height: 100vh;  /* Ocupa todo el alto de la vista */
+}
+
+.col-md-9 {
+    background-color: #f7f7f7;  /* Color de fondo para el área de trabajo */
+    height: 100vh;  /* Ocupa todo el alto de la vista */
+}
+
+/* Asegura que el fondo del body sea el mismo color que el sidebar */
+body {
+    background-color: #ffffff;
+}
+
+.module-item.active {
+    background-color: #ff4500;
+    color: #fff;
+}
+
+.custom-feature-list {
+    background-color: #333; /* Ejemplo de color de fondo */
+    color: #fff; /* Color del texto */
+    /* Otros estilos como bordes, márgenes, etc. */
+}
+.custom-feature-list li {
+    border: 1px solid #444; /* Ejemplo de estilo de borde */
+    /* Otros estilos para los elementos de la lista */
+}
+
+.welcome-section {
+    background-color: #fff; /* Fondo claro para destacar el contenido */
+    padding: 20px; /* Espaciado interno */
+    border-radius: 10px; /* Bordes redondeados para un aspecto suave */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil para dar profundidad */
+    margin-top: 20px; /* Espaciado desde la parte superior */
+}
+
+.welcome-title {
+    color: #ff4500; /* Color llamativo para el título */
+    font-size: 2.5rem; /* Tamaño de fuente grande */
+    font-weight: bold; /* Negrita para destacar */
+    margin-bottom: 15px; /* Espaciado después del título */
+}
+
+.welcome-description {
+    color: #333; /* Color oscuro para mejorar la legibilidad */
+    line-height: 1.6; /* Espaciado entre líneas */
+}
+
+/* Resaltar partes clave del mensaje */
+.welcome-description strong {
+    color: #ff4500;
+    font-weight: bold;
+}
+
+.backup-table {
+    color: #fff;  /* Texto blanco */
+    width: 100%;  /* Ocupar todo el ancho disponible */
+}
+
+.backup-table th {
+    background-color: #444;  /* Fondo oscuro para los encabezados */
+    color: #fff;  /* Texto blanco para los encabezados */
+}
+
+.backup-table td {
+    border: 1px solid #666;  /* Bordes claros para cada celda */
+}
+
+.expanded-workspace {
+    width: calc(100% - 250px); /* Ajustar según el ancho de tu sidebar */
+    min-height: 100vh; /* Asegurar que ocupe toda la altura de la pantalla */
+    background-color: #000; /* Fondo negro para esta vista */
+    color: #fff; /* Texto blanco para contraste */
+    padding: 20px; /* Espaciado interno adecuado */
+    overflow-x: auto; /* Añadir desplazamiento horizontal si es necesario */
+}
+
+.expanded-table {
+    min-width: 800px; /* Asegurarse de que la tabla sea suficientemente ancha */
+    width: 100%; /* Ajustar al ancho disponible */
+    border-collapse: collapse; /* Estilos de tabla */
+}
+
+.expanded-table th, .expanded-table td {
+    border: 1px solid #fff; /* Bordes claros para las celdas */
+    padding: 8px; /* Espaciado interno en las celdas */
+    text-align: left; /* Alineación del texto */
+}

@@ -1,0 +1,151 @@
+{% extends './base.html' %}
+
+{% block title %}Backup de Base de Datos{% endblock %}
+
+{% block customCSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename = 'css/styles.css')}}">
+{% endblock %}
+
+{% block body %}
+
+<body>
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById("dropdownMenu");
+            if (menu.style.display === "none" || menu.style.display === "") {
+                menu.style.display = "block";
+            } else {
+                menu.style.display = "none";
+            }
+        }
+  
+        function toggleActions(element) {
+            const allActionLists = document.querySelectorAll('.action-list');
+            const allModules = document.querySelectorAll('.module-item');
+  
+            allActionLists.forEach(list => list.style.display = 'none');
+            allModules.forEach(module => module.classList.remove('active'));
+  
+            element.classList.add('active');
+  
+            const currentActionList = element.nextElementSibling;
+            if (currentActionList.style.display === "none" || currentActionList.style.display === "") {
+                currentActionList.style.display = "block";
+            } else {
+                currentActionList.style.display = "none";
+            }
+        }
+      </script>
+      <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <section class="h-100 gradient-form">
+        <div class="container-fluid py-3 h-100">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <a href="{{ url_for('home') }}">
+                        <img src="{{ url_for('static', filename='img/Logo.png')}}" alt="Logo" class="logo-small mr-2">
+                    </a>    
+                        <h4 class="titulo-verde mb-0">RetainAI</h4>
+                </div>
+                <div class="menu-hamburger" onclick="toggleMenu()">
+                    &#9776;
+                </div>
+                <div id="dropdownMenu" class="dropdown-content">
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                    <a href="#">Ayuda</a>
+                    <a href="#">Reportar un problema</a>
+                </div>
+            </div>
+
+            <!-- Contenido principal: Sidebar y Área de trabajo -->
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-md-3 sidebar">
+                    <!-- Aquí irían todos los módulos del sidebar... -->
+
+                    <button class="module-item" onclick="toggleActions(this)">Módulo de Gestión de Usuario</button>
+                    <ul class="action-list">
+                        <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='add')}}" style="color: inherit; text-decoration: none;">Añadir usuario</a></li>
+                        <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='delete')}}" style="color: inherit; text-decoration: none;">Eliminar usuario</a></li>
+                        <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='update')}}" style="color: inherit; text-decoration: none;">Actualizar usuario</a></li>
+                        <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='change_password')}}" style="color: inherit; text-decoration: none;">Cambiar Contraseña</a></li>
+                        <li class="action-item"><a href="{{ url_for('backup')}}" style="color: inherit; text-decoration: none;">Backup</a></li>
+                    </ul>
+
+                  <!-- Módulo de Modelado Predictivo -->
+                    <button class="module-item" onclick="toggleActions(this)">Módulo de Carga de Datos</button>
+                    <ul class="action-list">
+                        <li class="action-item"><a href="{{ url_for('carga_datos', action='addds')}}" style="color: inherit; text-decoration: none;">Subir Dataset</a></li>
+                        <li class="action-item">Actualizar Dataset</li>
+                        <li class="action-item"><a href="{{ url_for('carga_datos_eliminar')}}" style="color: inherit; text-decoration: none;">Eliminar Dataset</a></li>
+                    </ul>
+
+                    <!-- Módulo de Modelado Predictivo -->
+                    <button class="module-item active-module active" onclick="toggleActions(this)">Módulo de Modelado Predictivo</button>
+                    <ul class="action-list active-module">
+                        <li class="action-item"><a href="{{ url_for('preprocesamiento') }}" style="color: inherit; text-decoration: none;">Pre-procesamiento</a></li>
+                        <li class="action-item"><a href="{{ url_for('preprocesamiento_prediccion') }}" style="color: inherit; text-decoration: none;">Pre-procesar Dataset Predicción</a></li>
+                        <li class="action-item"><a href="{{ url_for('train_xgboost') }}" style="color: inherit; text-decoration: none;">Entrenar XGBoost</a></li>
+                        <li class="action-item"><a href="{{ url_for('pred_xgboost') }}" style="color: inherit; text-decoration: none;">Predecir XGBoost</a></li>
+                        <li class="action-item"><a href="{{ url_for('train_rnn') }}" style="color: inherit; text-decoration: none;">Entrenar RNN</a></li>
+                        <li class="action-item"><a href="{{ url_for('pred_rnn') }}" style="color: inherit; text-decoration: none;">Predecir RNN</a></li>
+                        <li class="action-item"><a href="{{ url_for('train_hyb') }}" style="color: inherit; text-decoration: none;">Entrenar modelo híbrido</a></li>
+                        <li class="action-item"><a href="{{ url_for('pred_hyb') }}" style="color: inherit; text-decoration: none;">Predecir Modelo híbrido</a></li>
+                    </ul>
+
+                    <!-- Módulo de Visualización y Reportes -->
+                    <button class="module-item" onclick="toggleActions(this)">Módulo de Visualización y Reportes</button>
+                    <ul class="action-list">
+                        <li class="action-item"><a href="/visual/" style="color: inherit; text-decoration: none;">Dashboard</a></li>
+                        <li class="action-item">Resultados</li>
+                        <li class="action-item">Gráficas</li>
+                    </ul>
+                </div>
+
+                <!-- Área de trabajo -->
+                <div class="col-md-9 workspace">
+                    <div class="card bg-dark text-white mb-4">
+                        <div class="card-header">Backup de la Base de Datos</div>
+                        <div class="card-body">
+                            <div class="container mt-5">
+                                <h1 class="text-center mb-4">Backup de la Base de Datos</h1>
+                                
+                                <!-- Botón para Descargar Backup -->
+                                <div class="text-center mb-4">
+                                    <a href="{{ url_for('download_db_backup') }}" class="btn btn-primary">Descargar Backup de la Base de Datos</a>
+                                </div>
+                        
+                                <!-- Muestra las tablas y sus contenidos -->
+                                {% for table_name, rows in table_data.items() %}
+                                <div class="mt-4">
+                                    <h2>{{ table_name }}</h2>
+                                    <table class="table table-bordered backup-table">
+                                        <thead>
+                                            <tr>
+                                                {% for col in rows[0].keys() %}
+                                                <th>{{ col }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for row in rows %}
+                                            <tr>
+                                                {% for cell in row.values() %}
+                                                <td>{{ cell }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <p>No se encontraron tablas para mostrar.</p>
+                                {% endfor %}
+                            </div>
+    </section>
+    {% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,209 @@
+{% extends './base.html' %}
+
+{% block title %}Predicción Con Modelo Híbrido{% endblock %}
+
+{% block customCSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename = 'css/styles.css') }}">
+{% endblock %}
+
+{% block body %}
+<body>
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById("dropdownMenu");
+            if (menu.style.display === "none" || menu.style.display === "") {
+                menu.style.display = "block";
+            } else {
+                menu.style.display = "none";
+            }
+        }
+
+        function toggleActions(element) {
+            const allActionLists = document.querySelectorAll('.action-list');
+            const allModules = document.querySelectorAll('.module-item');
+
+            allActionLists.forEach(list => list.style.display = 'none');
+            allModules.forEach(module => module.classList.remove('active'));
+
+            element.classList.add('active');
+
+            const currentActionList = element.nextElementSibling;
+            if (currentActionList.style.display === "none" || currentActionList.style.display === "") {
+                currentActionList.style.display = "block";
+            } else {
+                currentActionList.style.display = "none";
+            }
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <section class="h-100 gradient-form">
+        <div class="container-fluid py-3 h-100">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <a href="{{ url_for('home') }}">
+                        <img src="{{ url_for('static', filename='img/Logo.png')}}" alt="Logo" class="logo-small mr-2">
+                    </a>    
+                        <h4 class="titulo-verde mb-0">RetainAI</h4>
+                </div>
+                <div class="menu-hamburger" onclick="toggleMenu()">
+                    &#9776;
+                </div>
+                <div id="dropdownMenu" class="dropdown-content">
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                    <a href="#">Ayuda</a>
+                    <a href="#">Reportar un problema</a>
+                </div>
+            </div>
+
+            <!-- Contenido principal: Sidebar y Área de trabajo -->
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-md-3 sidebar">
+
+                  <button class="module-item" onclick="toggleActions(this)">Módulo de Gestión de Usuario</button>
+                  <ul class="action-list">
+                    <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='add') }}" style="color: inherit; text-decoration: none;">Añadir usuario</a></li>
+                    <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='delete') }}" style="color: inherit; text-decoration: none;">Eliminar usuario</a></li>
+                    <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='update') }}" style="color: inherit; text-decoration: none;">Actualizar usuario</a></li>
+                    <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='change_password') }}" style="color: inherit; text-decoration: none;">Cambiar Contraseña</a></li>
+                    <li class="action-item"><a href="{{ url_for('backup')}}" style="color: inherit; text-decoration: none;">Backup</a></li>
+                </ul>
+
+                <button class="module-item" onclick="toggleActions(this)">Módulo de Carga de Datos</button>
+                <ul class="action-list">
+                    <li class="action-item"><a href="{{ url_for('carga_datos', action='addds') }}" style="color: inherit; text-decoration: none;">Subir Dataset</a></li>
+                    <li class="action-item">Actualizar Dataset</li>
+                    <li class="action-item"><a href="{{ url_for('carga_datos_eliminar') }}" style="color: inherit; text-decoration: none;">Eliminar Dataset</a></li>
+                </ul>
+
+                <button class="module-item active-module active" onclick="toggleActions(this)">Módulo de Modelado Predictivo</button>
+                <ul class="action-list active-module">
+                    <li class="action-item"><a href="{{ url_for('preprocesamiento') }}" style="color: inherit; text-decoration: none;">Pre-procesamiento</a></li>
+                    <li class="action-item"><a href="{{ url_for('preprocesamiento_prediccion') }}" style="color: inherit; text-decoration: none;">Pre-procesar Dataset Predicción</a></li>
+                    <li class="action-item"><a href="{{ url_for('train_xgboost') }}" style="color: inherit; text-decoration: none;">Entrenar XGBoost</a></li>
+                    <li class="action-item"><a href="{{ url_for('pred_xgboost') }}" style="color: inherit; text-decoration: none;">Predecir XGBoost</a></li>
+                    <li class="action-item"><a href="{{ url_for('train_rnn') }}" style="color: inherit; text-decoration: none;">Entrenar RNN</a></li>
+                    <li class="action-item"><a href="{{ url_for('pred_rnn') }}" style="color: inherit; text-decoration: none;">Predecir RNN</a></li>
+                    <li class="action-item"><a href="{{ url_for('train_hyb') }}" style="color: inherit; text-decoration: none;">Entrenar modelo híbrido</a></li>
+                    <li class="action-item"><a href="{{ url_for('pred_hyb') }}" style="color: inherit; text-decoration: none;">Predecir Modelo híbrido</a></li>
+                </ul>
+
+                    <button class="module-item" onclick="toggleActions(this)">Módulo de Visualización y Reportes</button>
+                    <ul class="action-list">
+                        <li class="action-item"><a href="/visual/" style="color: inherit; text-decoration: none;">Dashboard</a></li>
+                        <li class="action-item">Resultados</li>
+                        <li class="action-item">Gráficas</li>
+                </div>
+
+                <!-- Área de trabajo -->
+                <div class="col-md-9 workspace">
+                    <div class="card bg-dark text-white mb-4">
+                        <div class="card-header">Predecir Hybrid Model</div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('pred_hyb') }}">
+                                <!-- Tabla para seleccionar Preppred -->
+                                <h5>Datasets Preprocesados Disponibles:</h5>
+                                <table class="table table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Seleccionar</th>
+                                            <th scope="col">Nombre del Dataset</th>
+                                            <th scope="col">Fecha de Preprocesamiento</th>
+                                            <th scope="col">Procesado por</th>
+                                            <th scope="col">Comentario</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for preppred in preppreds %}
+                                        <tr>
+                                            <td><input type="radio" name="selected_preppred" value="{{ preppred.ID }}"></td>
+                                            <td>{{ preppred.Nombre }}</td>
+                                            <td>{{ preppred.Fecha }}</td>
+                                            <td>{{ preppred.usuario.User }}</td>
+                                            <td>{{ preppred.Comentario }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+    
+                                <!-- Tabla para seleccionar Trainxgboost -->
+                                <h5>Modelos Híbridos Entrenados:</h5>
+                                <table class="table table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Seleccionar</th>
+                                            <th scope="col">Nombre del Modelo</th>
+                                            <th scope="col">Fecha de Entrenamiento</th>
+                                            <th scope="col">Accuracy</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for modelo in entrenamientos_hybrid %}
+                                        <tr>
+                                            <td><input type="radio" name="selected_model" value="{{ modelo.ID }}"></td>
+                                            <td>{{ modelo.ModeloNombre }}</td>
+                                            <td>{{ modelo.Fecha }}</td>
+                                            <td>{{ modelo.Accuracy }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+    
+                                <!-- Botón para ejecutar la predicción -->
+                                <button type="submit" class="btn-login-login mb-4">Predecir</button>
+                                {% if download_path %}
+                                <a href="{{ url_for('download_file', path=download_path) }}" class="btn btn-success">Descargar</a>
+                                {% endif %}
+                            </form>
+                        </div>
+                    </div>
+
+                    {% with messages = get_flashed_messages() %}
+
+                        {% if messages %}
+                        {% for message in messages %}
+                    <div class="alert alert-primary" role="alert">
+                        <strong>{{ message }}</strong>
+                    </div>
+                        {% endfor %}
+
+                        {% endif %}
+
+                        {% endwith %}
+    
+                    <!-- Tabla con Resultados de Modelo Híbrido -->
+                    <div class="card bg-dark text-white mb-4">
+                        <div class="card-header">Resultados de Predicciones</div>
+                        <div class="card-body">
+                            <table class="table table-dark">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Usuario</th>
+                                        <th scope="col">Nombre de la Predicción</th>
+                                        <th scope="col">Fecha</th>
+                                        <th scope="col">Accuracy</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prediccion in predicciones %}
+                                    <tr>
+                                        <td>{{ prediccion.usuario.User }}</td>
+                                        <td>{{ prediccion.NombrePrediccion }}</td>
+                                        <td>{{ prediccion.Fecha }}</td>
+                                        <td>{{ prediccion.Accuracy }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </section>
+
+{% endblock %}
+</body>
+</html>

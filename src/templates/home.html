@@ -1,0 +1,128 @@
+{% extends './base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block customCSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename = 'css/styles.css')}}">
+{% endblock %}
+
+  {% block body %}
+  <section class="h-100 gradient-form">
+    <div class="container-fluid py-3 h-100">
+        <!-- Header: Logo, Nombre de App, Menú Hamburger -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center">
+                <a href="{{ url_for('home') }}">
+                    <img src="{{ url_for('static', filename='img/Logo.png')}}" alt="Logo" class="logo-small mr-2">
+                </a>    
+                    <h4 class="titulo-verde mb-0">RetainAI</h4>
+            </div>
+            <div class="menu-hamburger" onclick="toggleMenu()">
+                &#9776;
+            </div>
+            <div id="dropdownMenu" class="dropdown-content">
+                <a href="{{ url_for('logout') }}">Logout</a>
+                <a href="#">Ayuda</a>
+                <a href="#">Reportar un problema</a>
+            </div>
+        </div>
+
+        <!-- Contenido principal: Sidebar y Área de trabajo -->
+        <div class="row">
+            <!-- Sidebar: Lista de módulos y acciones -->
+            <div class="col-md-3 sidebar">
+                <!-- Módulo de Gestión de Usuario -->
+                <button class="module-item" onclick="toggleActions(this)">Módulo de Gestión de Usuario</button>
+                <ul class="action-list">
+                    <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='add')}}" style="color: inherit; text-decoration: none;">Añadir usuario</a></li>
+                        <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='delete')}}" style="color: inherit; text-decoration: none;">Eliminar usuario</a></li>
+                        <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='update')}}" style="color: inherit; text-decoration: none;">Actualizar usuario</a></li>
+                        <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='change_password')}}" style="color: inherit; text-decoration: none;">Cambiar Contraseña</a></li>
+                        <li class="action-item"><a href="{{ url_for('backup')}}" style="color: inherit; text-decoration: none;">Backup</a></li>
+                </ul>
+
+                <!-- Módulo de Carga de Datos -->
+                <button class="module-item" onclick="toggleActions(this)">Módulo de Carga de Datos</button>
+                <ul class="action-list">
+                    <li class="action-item"><a href="{{ url_for('carga_datos', action='addds')}}" style="color: inherit; text-decoration: none;">Subir Dataset</a></li>
+                        <li class="action-item">Actualizar Dataset</li>
+                        <li class="action-item"><a href="{{ url_for('carga_datos_eliminar')}}" style="color: inherit; text-decoration: none;">Eliminar Dataset</a></li>
+                </ul>
+
+                <!-- Módulo de Modelado Predictivo -->
+                <button class="module-item" onclick="toggleActions(this)">Módulo de Modelado Predictivo</button>
+                <ul class="action-list">
+                    <li class="action-item"><a href="{{ url_for('preprocesamiento') }}" style="color: inherit; text-decoration: none;">Pre-procesamiento</a></li>
+                    <li class="action-item"><a href="{{ url_for('preprocesamiento_prediccion') }}" style="color: inherit; text-decoration: none;">Pre-procesar Dataset Predicción</a></li>
+                    <li class="action-item"><a href="{{ url_for('train_xgboost') }}" style="color: inherit; text-decoration: none;">Entrenar XGBoost</a></li>
+                    <li class="action-item"><a href="{{ url_for('pred_xgboost') }}" style="color: inherit; text-decoration: none;">Predecir XGBoost</a></li>
+                    <li class="action-item"><a href="{{ url_for('train_rnn') }}" style="color: inherit; text-decoration: none;">Entrenar RNN</a></li>
+                    <li class="action-item"><a href="{{ url_for('pred_rnn') }}" style="color: inherit; text-decoration: none;">Predecir RNN</a></li>
+                    <li class="action-item"><a href="{{ url_for('train_hyb') }}" style="color: inherit; text-decoration: none;">Entrenar modelo híbrido</a></li>
+                    <li class="action-item"><a href="{{ url_for('pred_hyb') }}" style="color: inherit; text-decoration: none;">Predecir Modelo híbrido</a></li>
+                </ul>
+
+                <!-- Módulo de Visualización y Reportes -->
+                <button class="module-item" onclick="toggleActions(this)">Módulo de Visualización y Reportes</button>
+                <ul class="action-list">
+                    <li class="action-item"><a href="/visual/" style="color: inherit; text-decoration: none;">Dashboard</a></li>
+                    <li class="action-item">Resultados</li>
+                    <li class="action-item">Gráficas</li>
+                </ul>
+            </div>
+            <div class="col-md-9 welcome-section">
+                <h2 class="welcome-title">Bienvenido a RetainAI</h2>
+                <p class="welcome-description"><strong>RetainAI</strong> es una plataforma avanzada de análisis de datos y modelado predictivo diseñada para impulsar decisiones empresariales inteligentes y eficientes. Utilizando la última tecnología en <strong>inteligencia artificial y aprendizaje automático</strong>, RetainAI te ofrece herramientas potentes y fáciles de usar para transformar tus datos en insights valiosos.
+
+                    Nuestra plataforma facilita la carga, el preprocesamiento y el análisis de grandes conjuntos de datos, permitiéndote descubrir tendencias ocultas y patrones significativos. Con capacidades de modelado predictivo, como XGBoost y Redes Neuronales Recurrentes, RetainAI te ayuda a prever resultados futuros y tomar decisiones basadas en datos con mayor precisión.
+                    
+                    Además, con RetainAI, puedes <strong>visualizar</strong> tus datos de manera intuitiva y generar reportes personalizados, lo que te permite compartir tus hallazgos de manera efectiva con tu equipo o stakeholders.
+                    
+                    Ya sea que te enfoques en la retención de clientes, la optimización de procesos o la predicción de tendencias del mercado, RetainAI está aquí para convertir tus <strong>datos en tu activo más valioso</strong>.</p>
+
+            {% with messages = get_flashed_messages() %}
+
+                      {% if messages %}
+                      <br/>
+                      {% for message in messages %}
+                    <div class="alert alert-primary" role="alert">
+                      <strong>{{ message }}</strong>
+                    </div>
+                      {% endfor %}
+
+                      {% endif %}
+
+                      {% endwith %}
+            </div>
+        </div>          
+</section>
+<script>
+    function toggleMenu() {
+        const menu = document.getElementById("dropdownMenu");
+        if (menu.style.display === "none" || menu.style.display === "") {
+            menu.style.display = "block";
+        } else {
+            menu.style.display = "none";
+        }
+    }
+
+    function toggleActions(element) {
+        const allActionLists = document.querySelectorAll('.action-list');
+        const allModules = document.querySelectorAll('.module-item');
+
+        allActionLists.forEach(list => list.style.display = 'none');
+        allModules.forEach(module => module.classList.remove('active'));
+
+        element.classList.add('active');
+
+        const currentActionList = element.nextElementSibling;
+        if (currentActionList.style.display === "none" || currentActionList.style.display === "") {
+            currentActionList.style.display = "block";
+        } else {
+            currentActionList.style.display = "none";
+        }
+    }
+  </script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  {% endblock %}

@@ -1,0 +1,193 @@
+{% extends './base.html' %}
+
+{% block title %}Cambiar Contraseña{% endblock %}
+
+{% block customCSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename = 'css/styles.css')}}">
+{% endblock %}
+
+{% block body %}
+<body>
+    <script>
+        function toggleMenu() {
+            const dropdownMenu = document.getElementById("dropdownMenu");
+            if (dropdownMenu.style.display === "none" || dropdownMenu.style.display === "") {
+                dropdownMenu.style.display = "block";
+            } else {
+                dropdownMenu.style.display = "none";
+            }
+        }
+
+        function toggleActions(element) {
+            const allActionLists = document.querySelectorAll('.action-list');
+            const allModules = document.querySelectorAll('.module-item');
+
+            allActionLists.forEach(list => list.style.display = 'none');
+            allModules.forEach(module => module.classList.remove('active'));
+
+            element.classList.add('active');
+
+            const currentActionList = element.nextElementSibling;
+            if (currentActionList.style.display === "none" || currentActionList.style.display === "") {
+                currentActionList.style.display = "block";
+            } else {
+                currentActionList.style.display = "none";
+            }
+        }
+    </script>  
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>  
+         
+    <section class="h-100 gradient-form">
+        <div class="container-fluid py-3 h-100">
+            <!-- Header: Logo, Nombre de App, Menú Hamburger -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <a href="{{ url_for('home') }}">
+                        <img src="{{ url_for('static', filename='img/Logo.png')}}" alt="Logo" class="logo-small mr-2">
+                    </a>    
+                        <h4 class="titulo-verde mb-0">RetainAI</h4>
+                </div>
+                <div class="menu-hamburger" onclick="toggleMenu()">
+                    &#9776;
+                </div>
+                <div id="dropdownMenu" class="dropdown-content">
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                    <a href="#">Ayuda</a>
+                    <a href="#">Reportar un problema</a>
+                </div>
+            </div>
+
+            <!-- Contenido principal: Sidebar y Área de trabajo -->
+            <div class="row">
+                <!-- Sidebar: Lista de módulos y acciones -->
+                <div class="col-md-3 sidebar">
+                    <!-- Módulo de Gestión de Usuario -->
+                    <button class="module-item active active" onclick="toggleActions(this)">Módulo de Gestión de Usuario</button>
+                    <ul class="action-list active-module">
+                        <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='add')}}" style="color: inherit; text-decoration: none;">Añadir usuario</a></li>
+                        <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='delete')}}" style="color: inherit; text-decoration: none;">Eliminar usuario</a></li>
+                        <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='update')}}" style="color: inherit; text-decoration: none;">Actualizar usuario</a></li>
+                        <li class="action-item"><a href="{{ url_for('gestion_usuarios', action='change_password')}}" style="color: inherit; text-decoration: none;">Cambiar Contraseña</a></li>
+                        <li class="action-item"><a href="{{ url_for('backup')}}" style="color: inherit; text-decoration: none;">Backup</a></li>
+                    </ul>
+                    <!-- Módulo de Carga de Datos -->
+                    <button class="module-item" onclick="toggleActions(this)">Módulo de Carga de Datos</button>
+                    <ul class="action-list">
+                        <li class="action-item"><a href="{{ url_for('carga_datos', action='addds')}}" style="color: inherit; text-decoration: none;">Subir Dataset</a></li>
+                        <li class="action-item">Actualizar Dataset</li>
+                        <li class="action-item"><a href="{{ url_for('carga_datos_eliminar')}}" style="color: inherit; text-decoration: none;">Eliminar Dataset</a></li>
+
+                    <!-- Módulo de Modelado Predictivo -->
+                    <button class="module-item" onclick="toggleActions(this)">Módulo de Modelado Predictivo</button>
+                    <ul class="action-list">
+                        <li class="action-item"><a href="{{ url_for('preprocesamiento') }}" style="color: inherit; text-decoration: none;">Pre-procesamiento</a></li>
+                        <li class="action-item"><a href="{{ url_for('preprocesamiento_prediccion') }}" style="color: inherit; text-decoration: none;">Pre-procesar Dataset Predicción</a></li>
+                        <li class="action-item"><a href="{{ url_for('train_xgboost') }}" style="color: inherit; text-decoration: none;">Entrenar XGBoost</a></li>
+                        <li class="action-item"><a href="{{ url_for('pred_xgboost') }}" style="color: inherit; text-decoration: none;">Predecir XGBoost</a></li>
+                        <li class="action-item"><a href="{{ url_for('train_rnn') }}" style="color: inherit; text-decoration: none;">Entrenar RNN</a></li>
+                        <li class="action-item"><a href="{{ url_for('pred_rnn') }}" style="color: inherit; text-decoration: none;">Predecir RNN</a></li>
+                        <li class="action-item"><a href="{{ url_for('train_hyb') }}" style="color: inherit; text-decoration: none;">Entrenar modelo híbrido</a></li>
+                        <li class="action-item"><a href="{{ url_for('pred_hyb') }}" style="color: inherit; text-decoration: none;">Predecir Modelo híbrido</a></li>
+                    </ul>
+
+                    <!-- Módulo de Visualización y Reportes -->
+                    <button class="module-item" onclick="toggleActions(this)">Módulo de Visualización y Reportes</button>
+                    <ul class="action-list">
+                        <li class="action-item"><a href="/visual/" style="color: inherit; text-decoration: none;">Dashboard</a></li>
+                        <li class="action-item">Resultados</li>
+                        <li class="action-item">Gráficas</li>
+                    </ul>
+                </div>
+
+                <!-- Área de trabajo -->
+                <div class="col-md-9 workspace">
+                    <div class="card bg-dark text-white mb-4">
+                        <div class="card-header">Actualizar Contraseña</div>
+                        <div class="card-body">
+                            <h5>Seleccionar usuario para Cambio de Password</h5>
+                             <!-- Seleccionar usuario para actualizar -->
+                             <form method="post" action="{{ url_for('gestion_usuarios') }}">
+                                <input type="hidden" name="action" value="change_password">  <!-- Esto especifica la acción -->
+                                <select class="form-control mb-4" id="selectUser" name="selected_user_id">
+                                    <option value="">Seleccione un usuario</option>
+                                    {% for user in users %}
+                                        <option value="{{ user.ID }}" {% if user_to_update and user.ID == user_to_update.ID %}selected{% endif %}>
+                                            {{ user.ID }} - {{ user.User }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-login-login mb-4">Seleccionar</button>
+                            </form>
+
+                            <!-- Formulario para cambiar la contraseña del usuario -->
+                            {% if user_to_update %}
+                            <form method="post" action="{{ url_for('gestion_usuarios') }}">
+                                {{ form.csrf_token }}
+                                <input type="hidden" name="action" value="change_password">
+                                <input type="hidden" name="user_id" value="{{ user_to_update.ID }}">
+                                
+                                <div class="mb-3">
+                                    <label for="current_password" class="form-label">Contraseña Actual</label>
+                                    {{ form.current_password(class="form-control") }}
+                                </div>
+                            
+                                <div class="mb-3">
+                                    <label for="new_password" class="form-label">Nueva Contraseña</label>
+                                    {{ form.new_password(class="form-control") }}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="confirm_password" class="form-label">Confirmar Nueva Contraseña</label>
+                                    {{ form.confirm_password(class="form-control") }}
+                                </div>
+                            
+                                <button type="submit" class="btn btn-login-login mb-4">Cambiar Contraseña</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        {% with messages = get_flashed_messages() %}
+
+                        {% if messages %}
+                        <br/>
+                        {% for message in messages %}
+                    <div class="alert alert-primary" role="alert">
+                        <strong>{{ message }}</strong>
+                    </div>
+                        {% endfor %}
+
+                        {% endif %}
+
+                        {% endwith %}
+                    </div>
+                    <div class="card bg-dark text-white">
+                        <div class="card-header">Usuarios</div>
+                        <div class="card-body">
+                            <table class="table table-dark">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">User</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Rol</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                    <tr>
+                                        <td>{{ user.User }}</td>
+                                        <td>{{ user.Email }}</td>
+                                        <td>{{ user.rol.Nombre }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endblock %}
+</body>
+
+</html>
