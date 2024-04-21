@@ -78,7 +78,6 @@
                     <button class="module-item" onclick="toggleActions(this)">Módulo de Carga de Datos</button>
                     <ul class="action-list">
                         <li class="action-item"><a href="{{ url_for('carga_datos', action='addds')}}" style="color: inherit; text-decoration: none;">Subir Dataset</a></li>
-                        <li class="action-item">Actualizar Dataset</li>
                         <li class="action-item"><a href="{{ url_for('carga_datos_eliminar')}}" style="color: inherit; text-decoration: none;">Eliminar Dataset</a></li>
                     </ul>
 
@@ -99,8 +98,7 @@
                     <button class="module-item" onclick="toggleActions(this)">Módulo de Visualización y Reportes</button>
                     <ul class="action-list">
                         <li class="action-item"><a href="/visual/" style="color: inherit; text-decoration: none;">Dashboard</a></li>
-                        <li class="action-item">Resultados</li>
-                        <li class="action-item">Gráficas</li>
+                        <li class="action-item"><a href="{{ url_for('reporte') }}" style="color: inherit; text-decoration: none;">Reporte</a></li>
                     </ul>
                 </div>
 

@@ -1,6 +1,6 @@
 {% extends './base.html' %}
 
-{% block title %}Preprocesamiento Predicción{% endblock %}
+{% block title %}Predicción Con XGBoost{% endblock %}
 
 {% block customCSS %}
 <link rel="stylesheet" href="{{ url_for('static', filename = 'css/styles.css') }}">
@@ -78,7 +78,7 @@
                     <li class="action-item"><a href="{{ url_for('carga_datos_eliminar') }}" style="color: inherit; text-decoration: none;">Eliminar Dataset</a></li>
                 </ul>
 
-                <button class="module-item active-module active" onclick="toggleActions(this)">Módulo de Modelado Predictivo</button>
+                <button class="module-item" onclick="toggleActions(this)">Módulo de Modelado Predictivo</button>
                 <ul class="action-list active-module">
                     <li class="action-item"><a href="{{ url_for('preprocesamiento') }}" style="color: inherit; text-decoration: none;">Pre-procesamiento</a></li>
                     <li class="action-item"><a href="{{ url_for('preprocesamiento_prediccion') }}" style="color: inherit; text-decoration: none;">Pre-procesar Dataset Predicción</a></li>
@@ -90,7 +90,7 @@
                     <li class="action-item"><a href="{{ url_for('pred_hyb') }}" style="color: inherit; text-decoration: none;">Predecir Modelo híbrido</a></li>
                 </ul>
 
-                    <button class="module-item" onclick="toggleActions(this)">Módulo de Visualización y Reportes</button>
+                    <button class="module-item active-module active" onclick="toggleActions(this)">Módulo de Visualización y Reportes</button>
                     <ul class="action-list">
                         <li class="action-item"><a href="/visual/" style="color: inherit; text-decoration: none;">Dashboard</a></li>
                         <li class="action-item"><a href="{{ url_for('reporte') }}" style="color: inherit; text-decoration: none;">Reporte</a></li>
@@ -100,70 +100,53 @@
                 <!-- Área de trabajo -->
                 <div class="col-md-9 workspace">
                     <div class="card bg-dark text-white mb-4">
-                        <div class="card-header">Entrenar RNN</div>
+                        <div class="card-header">Reporte de Predicciones</div>
                         <div class="card-body">
-                            <form method="POST" action="{{ url_for('train_rnn') }}">
-                                <h5>Datasets disponibles para entrenamiento:</h5>
-                                <table class="table table-dark mb-4">
+                            <form method="GET" action="{{ url_for('download_file') }}">
+                                <!-- Tabla para seleccionar Preppred -->
+                                <h5>Datasets Predecidos Disponibles:</h5>
+                                <table class="table table-dark">
                                     <thead>
                                         <tr>
-                                            <th scope="col">Seleccionar</th>
-                                            <th scope="col">Nombre del Dataset</th>
-                                            <th scope="col">Fecha de Preprocesamiento</th>
-                                            <th scope="col">Procesado por</th>
-                                            <th scope="col">Comentario</th>
+                                            <th scope="col"></th> <!-- Columna para el botón radial -->
+                                            <th scope="col">Usuario</th>
+                                            <th scope="col">Nombre de la Predicción</th>
+                                            <th scope="col">Fecha</th>
+                                            <th scope="col">Accuracy</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for preprocesamiento in preprocesamientos %}
+                                        {% for pred in predicciones %}
                                         <tr>
-                                            <td><input type="radio" name="selected_preproc" value="{{ preprocesamiento.ID }}"></td>
-                                            <td>{{ preprocesamiento.dataset.Nombre }}</td>
-                                            <td>{{ preprocesamiento.Fecha }}</td>
-                                            <td>{{ preprocesamiento.usuario.User }}</td>
-                                            <td>{{ preprocesamiento.Comentario }}</td>
+                                            <td><input type="radio" name="path" value="{{ pred.PredFilePath }}"></td>
+                                            <td>{{ pred.usuario.User }}</td>
+                                            <td>{{ pred.NombrePrediccion }}</td>
+                                            <td>{{ pred.Fecha.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>{{ pred.Accuracy }}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
-                                <button type="submit" class="btn-login-login mb-4">Entrenar</button>
-                                <button type="button" class="btn-login-login mb-4 ml-2">Cancelar</button>
-                            </form>
-                        </div>
-                            <!-- Tabla de Resultados de Entrenamiento -->
-                            <div class="card bg-dark text-white mb-4">
-                                <div class="card-header">Modelos RNN Entrenados</div>
-                                <div class="card-body">
-                                    <table class="table table-dark">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col">Usuario</th>
-                                                <th scope="col">Nombre del Modelo</th>
-                                                <th scope="col">Fecha de Entrenamiento</th>
-                                                <th scope="col">Accuracy</th>
-                                                <th scope="col">Recall</th>
-                                                <th scope="col">F1-Score</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for entrenamientornn in entrenamientos_rnn %}
-                                            <tr>
-                                                <td>{{ entrenamientornn.User }}</td>
-                                                <td>{{ entrenamientornn.ModeloNombre }}</td>
-                                                <td>{{ entrenamientornn.Fecha }}</td>
-                                                <td>{{ entrenamientornn.Accuracy }}</td>
-                                                <td>{{ entrenamientornn.Recall }}</td>
-                                                <td>{{ entrenamientornn.F1Score }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                                <button type="submit" class="btn-login-login mb-4">Descargar Predicción</button>
+
+                    {% with messages = get_flashed_messages() %}
+
+                        {% if messages %}
+                        {% for message in messages %}
+                    <div class="alert alert-primary" role="alert">
+                        <strong>{{ message }}</strong>
                     </div>
+                        {% endfor %}
+
+                        {% endif %}
+
+                        {% endwith %}
+                    </form>
                 </div>
-    </section>
+            </div>
+        </div>
+    </div>
+</section>
 
 {% endblock %}
 </body>

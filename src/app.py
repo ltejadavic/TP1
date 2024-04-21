@@ -1338,6 +1338,15 @@ def pred_hyb():
                            predicciones=predicciones,
                            download_path=download_path)
 
+@app.route('/reporte', methods=['GET'])
+@login_required
+@requires_roles('Administrador', 'Analista', 'Gerente')
+def reporte():
+    predicciones = Predxgboost.query.all()
+    for pred in predicciones:
+        pred.Accuracy = round(pred.Accuracy, 3)  # Redondear el accuracy a 3 decimales
+    return render_template('visualizacion/reporte.html', predicciones=predicciones)
+
 if __name__ == '__main__':
     create_default_roles()  # Asegura que existan los roles por defecto
     create_default_admin()  # Asegura que exista un administrador por defecto
