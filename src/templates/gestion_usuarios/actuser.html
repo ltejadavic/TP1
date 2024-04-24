@@ -127,12 +127,12 @@
                                 <input type="hidden" name="user_id_to_update" value="{{ user_to_update.ID }}">
                                 <div class="mb-3">
                                     <label for="User" class="form-label">User</label>
-                                    <input type="text" name="username" class="form-control" value="{{ user_to_update.User }}">
+                                    <input type="text" name="username" class="form-control" value="{{ user_to_update.User }}" required>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="Email" class="form-label">Email</label>
-                                    <input type="text" name="email" class="form-control" value="{{ user_to_update.Email }}">
+                                    <input type="email" name="email" class="form-control" value="{{ user_to_update.Email }}" required>
                                 </div>
 
                                 <select class="form-control" name="rol">

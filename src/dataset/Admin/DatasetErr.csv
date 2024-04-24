@@ -1,0 +1,41 @@
+﻿LISTADO DE CASOS DE PRUEBA,,,,
+Casos de Prueba,Descripción del Caso de Prueba,Identificador (ID) de la Historia (*),Número (#) de Escenario  (*),Criterio de Aceptación (Título)  (*)
+CP001, Iniciar Sesion Administrador,H0001,1,Iniciar Sesion Administrador
+CP002, Iniciar Sesion Administrador,H0001,2,Error por dejar usuario en blanco al iniciar sesion por Administrador
+CP003, Iniciar Sesion Administrador,H0001,3,Error por dejar contraseña en blanco al iniciar sesion por Administrador
+CP004, Iniciar Sesion Administrador,H0001,4,Error por escribir mal usuario al iniciar sesion por Administrador
+CP005, Iniciar Sesion Administrador,H0001,5,Error por escribir mal contraseña al iniciar sesion por Administrador
+CP006,Iniciar Sesion Analista,H0004,1,Iniciar Sesion Analista
+CP007,Iniciar Sesion Analista,H0004,2,Error por dejar usuario en blanco al iniciar sesion por Analista
+CP008,Iniciar Sesion Analista,H0004,3,Error por dejar contraseña en blanco al iniciar sesion por Analista
+CP009,Iniciar Sesion Analista,H0004,4,Error por escribir mal usuario al iniciar sesion por Analista
+CP010,Iniciar Sesion Analista,H0004,5,Error por escribir mal contraseña al iniciar sesion por Analista
+CP011,Iniciar Sesion Gerente,H0005,1,Iniciar Sesion Gerente
+CP012,Iniciar Sesion Administrador,H0005,2,Error por dejar usuario en blanco al iniciar sesion por Gerente
+CP013,Iniciar Sesion Administrador,H0005,3,Error por dejar contraseña en blanco al iniciar sesion por Gerente
+CP014,Iniciar Sesion Administrador,H0005,4,Error por escribir mal usuario al iniciar sesion por Gerente
+CP015,Iniciar Sesion Administrador,H0005,5,Error por escribir mal contraseña al iniciar sesion por Gerente
+CP016,Crear Usuario,H0002,1,Añadir Usuario
+CP017,Crear Usuario,H0002,2,Error por Usuario en blanco
+CP018,Crear Usuario,H0002,3,Error por Contraseña en blanco
+CP019,Crear Usuario,H0002,4,Error por Email en blanco
+CP020,Crear Usuario,H0002,5,Error por Usuario Repetido
+CP021,Crear Usuario,H0002,6,Error por Email Repetido
+CP022,Asignar Rol,H0003,1,Asignar Rol
+CP023,Actualizar Usuario,H0006,1,Actualizar Usuario
+CP024,Actualizar Usuario,H0006,2,Actualizar Email
+CP025,Actualizar Usuario,H0006,3,Actualizar Rol
+CP026,Actualizar Usuario,H0006,4,Actualizar Usario User Vacío
+CP027,Actualizar Usuario,H0006,5,Actualizar Usario Email Vacío
+CP028,Actualizar Usuario,H0006,6,Actualizar Usario sin cambios
+CP029,Eliminar Usuario,H0007,1,Eliminar Usario
+CP030,Eliminar Usuario,H0007,2,Eliminar Usario no seleccionado
+CP031,Ingresar a Interfaz,H0008,1,Ingrezar a Módulo Home
+CP032,Subir Dataset,H0009,1,Subir Dataset
+CP033,Subir Dataset,H0009,2,Subir dataset nombre en blanco
+CP034,Subir Dataset,H0009,3,Subir dataset comentario en blanco
+CP035,Subir Dataset,H0009,4,Subir dataset no archivo
+CP036,Eliminar Dataset,H0010,1,Eliminar Dataset Seleccionado
+CP037,Preprocesar Dataset Entrenamiento,H0011,1,Preprocesar dataset entrenamiento
+CP038,Preprocesar Entrenamiento,H0012,1,Preprocesar dataset entrenamiento
+CP039,Preprocesar Predicción,H0013,1,Preprocesar dataset Predicción

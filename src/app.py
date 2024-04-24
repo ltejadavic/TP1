@@ -661,49 +661,61 @@ def preprocesamiento():
 
     if request.method == 'POST':
         dataset_id = request.form.get('selected_dataset')
-        dataset = Dataset.query.get(dataset_id)
+        if not dataset_id:  # Comprobar si se seleccionó un dataset
+            flash('Por favor seleccione un dataset', 'error')  # Mostrar mensaje de error
+            return render_template('modelado_predictivo/preproc.html', datasets=datasets, preview_data=preview_data, preprocesamientos=preprocesamientos, selected_features=selected_features)
+        
+        try:
+            dataset = Dataset.query.get(dataset_id)
 
-        if dataset:
-            user_folder = os.path.join('src/preproc', current_user.User)
-            if not os.path.exists(user_folder):
-                os.makedirs(user_folder)
+            if dataset:
+                user_folder = os.path.join('src/preproc', current_user.User)
+                if not os.path.exists(user_folder):
+                    os.makedirs(user_folder)
 
-            # Crear una subcarpeta con la fecha actual
-            date_folder = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-            base_folder = os.path.join(user_folder, date_folder)
-            if not os.path.exists(base_folder):
-                os.makedirs(base_folder)
+                # Crear una subcarpeta con la fecha actual
+                date_folder = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                base_folder = os.path.join(user_folder, date_folder)
+                if not os.path.exists(base_folder):
+                    os.makedirs(base_folder)
 
-            # Ejecutar el preprocesamiento
-            preprocessed_data, selected_features, num_rows, num_features, x_train_file_path, x_test_file_path, y_train_file_path, y_test_file_path = realizar_preprocesamiento(dataset.FilePath, base_folder)
+                # Ejecutar el preprocesamiento
+                preprocessed_data, selected_features, num_rows, num_features, x_train_file_path, x_test_file_path, y_train_file_path, y_test_file_path = realizar_preprocesamiento(dataset.FilePath, base_folder)
 
-            preprocessed_file_path = os.path.join(base_folder, dataset.Nombre + '_preproc.csv')
-            preprocessed_data.to_csv(preprocessed_file_path, index=False)
+                preprocessed_file_path = os.path.join(base_folder, dataset.Nombre + '_preproc.csv')
+                preprocessed_data.to_csv(preprocessed_file_path, index=False)
 
-            # Guardar en base de datos
-            new_preproc = Preprocesamiento(
-                DatasetID=dataset.ID,
-                UsuarioID=current_user.ID,
-                Fecha=datetime.datetime.now(),
-                Comentario="Preprocesamiento completado",
-                FilePath=preprocessed_file_path,
-                X_trainPath=x_train_file_path,
-                X_testPath=x_test_file_path,
-                y_trainPath=y_train_file_path,
-                y_testPath=y_test_file_path
-            )
-            db.session.add(new_preproc)
-            db.session.commit()
-            
-            # Cargar las primeras 10 filas para la vista previa
-            preview_data = pd.read_csv(x_train_file_path).head(10)
+                # Guardar en base de datos
+                new_preproc = Preprocesamiento(
+                    DatasetID=dataset.ID,
+                    UsuarioID=current_user.ID,
+                    Fecha=datetime.datetime.now(),
+                    Comentario="Preprocesamiento completado",
+                    FilePath=preprocessed_file_path,
+                    X_trainPath=x_train_file_path,
+                    X_testPath=x_test_file_path,
+                    y_trainPath=y_train_file_path,
+                    y_testPath=y_test_file_path
+                )
+                db.session.add(new_preproc)
+                db.session.commit()
+                
+                # Cargar las primeras 10 filas para la vista previa
+                preview_data = pd.read_csv(x_train_file_path).head(10)
 
-            # Recargar la lista de preprocesamientos para asegurar que incluye el último realizado
-            preprocesamientos = Preprocesamiento.query \
-                            .join(User, Preprocesamiento.UsuarioID == User.ID) \
-                            .join(Dataset, Preprocesamiento.DatasetID == Dataset.ID) \
-                            .add_columns(User.User, Dataset.Nombre, Preprocesamiento.Fecha, Preprocesamiento.Comentario) \
-                            .all()
+                # Recargar la lista de preprocesamientos para asegurar que incluye el último realizado
+                preprocesamientos = Preprocesamiento.query \
+                                .join(User, Preprocesamiento.UsuarioID == User.ID) \
+                                .join(Dataset, Preprocesamiento.DatasetID == Dataset.ID) \
+                                .add_columns(User.User, Dataset.Nombre, Preprocesamiento.Fecha, Preprocesamiento.Comentario) \
+                                .all()
+                flash('Preprocesamiento realizado con éxito.', 'success')
+            else:
+                flash('No se encontró el dataset seleccionado.', 'error')
+                return redirect(url_for('home'))
+        except Exception as e:
+            flash(f'Error al preprocesar el dataset: {str(e)}', 'error')
+            return redirect(url_for('home'))
 
     return render_template('modelado_predictivo/preproc.html', datasets=datasets, preview_data=preview_data, preprocesamientos=preprocesamientos, selected_features=selected_features)
 
