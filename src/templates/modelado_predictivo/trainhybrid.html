@@ -130,6 +130,21 @@
                                 <button type="button" class="btn-login-login mb-4 ml-2">Cancelar</button>
                             </form>
                         </div>
+
+                            {% with messages = get_flashed_messages() %}
+
+                            {% if messages %}
+                            <br/>
+                            {% for message in messages %}
+                        <div class="alert alert-primary" role="alert">
+                            <strong>{{ message }}</strong>
+                        </div>
+                            {% endfor %}
+
+                            {% endif %}
+
+                            {% endwith %}
+
                             <!-- Tabla de Resultados de Entrenamiento -->
                             <div class="card bg-dark text-white mb-4">
                                 <div class="card-header">Modelos Híbridos Entrenados</div>

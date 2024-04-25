@@ -1,0 +1,41 @@
+LISTADO DE CASOS DE PRUEBA,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,churn
+Casos de Prueba,Descripción del Caso de Prueba,Identificador (ID) de la Historia (*),Número (#) de Escenario  (*),Criterio de Aceptación (Título)  (*),0
+CP001, Iniciar Sesion Administrador,H0001,1,Iniciar Sesion Administrador,0
+CP002, Iniciar Sesion Administrador,H0001,2,Error por dejar usuario en blanco al iniciar sesion por Administrador,0
+CP003, Iniciar Sesion Administrador,H0001,3,Error por dejar contraseña en blanco al iniciar sesion por Administrador,0
+CP004, Iniciar Sesion Administrador,H0001,4,Error por escribir mal usuario al iniciar sesion por Administrador,0
+CP005, Iniciar Sesion Administrador,H0001,5,Error por escribir mal contraseña al iniciar sesion por Administrador,0
+CP006,Iniciar Sesion Analista,H0004,1,Iniciar Sesion Analista,0
+CP007,Iniciar Sesion Analista,H0004,2,Error por dejar usuario en blanco al iniciar sesion por Analista,0
+CP008,Iniciar Sesion Analista,H0004,3,Error por dejar contraseña en blanco al iniciar sesion por Analista,0
+CP009,Iniciar Sesion Analista,H0004,4,Error por escribir mal usuario al iniciar sesion por Analista,0
+CP010,Iniciar Sesion Analista,H0004,5,Error por escribir mal contraseña al iniciar sesion por Analista,0
+CP011,Iniciar Sesion Gerente,H0005,1,Iniciar Sesion Gerente,0
+CP012,Iniciar Sesion Administrador,H0005,2,Error por dejar usuario en blanco al iniciar sesion por Gerente,0
+CP013,Iniciar Sesion Administrador,H0005,3,Error por dejar contraseña en blanco al iniciar sesion por Gerente,0
+CP014,Iniciar Sesion Administrador,H0005,4,Error por escribir mal usuario al iniciar sesion por Gerente,0
+CP015,Iniciar Sesion Administrador,H0005,5,Error por escribir mal contraseña al iniciar sesion por Gerente,0
+CP016,Crear Usuario,H0002,1,Añadir Usuario,0
+CP017,Crear Usuario,H0002,2,Error por Usuario en blanco,0
+CP018,Crear Usuario,H0002,3,Error por Contraseña en blanco,0
+CP019,Crear Usuario,H0002,4,Error por Email en blanco,0
+CP020,Crear Usuario,H0002,5,Error por Usuario Repetido,0
+CP021,Crear Usuario,H0002,6,Error por Email Repetido,0
+CP022,Asignar Rol,H0003,1,Asignar Rol,0
+CP023,Actualizar Usuario,H0006,1,Actualizar Usuario,0
+CP024,Actualizar Usuario,H0006,2,Actualizar Email,0
+CP025,Actualizar Usuario,H0006,3,Actualizar Rol,0
+CP026,Actualizar Usuario,H0006,4,Actualizar Usario User Vacío,0
+CP027,Actualizar Usuario,H0006,5,Actualizar Usario Email Vacío,0
+CP028,Actualizar Usuario,H0006,6,Actualizar Usario sin cambios,0
+CP029,Eliminar Usuario,H0007,1,Eliminar Usario,0
+CP030,Eliminar Usuario,H0007,2,Eliminar Usario no seleccionado,0
+CP031,Ingresar a Interfaz,H0008,1,Ingrezar a Módulo Home,0
+CP032,Subir Dataset,H0009,1,Subir Dataset,0
+CP033,Subir Dataset,H0009,2,Subir dataset nombre en blanco,0
+CP034,Subir Dataset,H0009,3,Subir dataset comentario en blanco,0
+CP035,Subir Dataset,H0009,4,Subir dataset no archivo,0
+CP036,Eliminar Dataset,H0010,1,Eliminar Dataset Seleccionado,0
+CP037,Preprocesar Dataset Entrenamiento,H0011,1,Preprocesar dataset entrenamiento,0
+CP038,Preprocesar Entrenamiento,H0012,1,Preprocesar dataset entrenamiento,0
+CP039,Preprocesar Predicción,H0013,1,Preprocesar dataset Predicción,0

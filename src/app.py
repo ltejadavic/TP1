@@ -362,11 +362,20 @@ def logout():
 
 @app.route('/download_file/')
 def download_file():
-    path = request.args.get('path')
-    if path:
-        return send_file(path, as_attachment=True)
-    else:
-        return "File path not provided", 400
+    try:
+        path = request.args.get('path')
+        source = request.args.get('source')
+        if path:
+            return send_file(path, as_attachment=True)
+        elif source == 'reporte':
+            flash("Seleccione una predicción para descargar", 'error')
+            return redirect(url_for('reporte'))
+        else:
+            return "File path not provided", 400
+    except Exception as e:
+        flash(f"Error al descargar el archivo: {str(e)}", 'error')
+        return redirect(url_for('home'))
+    
 
 @login_manager.unauthorized_handler
 def unauthorized():
@@ -494,68 +503,73 @@ ACTIONS = {
 @login_required
 @requires_roles('Administrador')
 def gestion_usuarios():
-    print("Request Method:", request.method)
-    print("POST Data:", request.form)
-    if request.method == 'POST':
-        action = request.form.get('action', 'add')
-    else:
-        action = request.args.get('action', 'add')
+    try:
+        print("Request Method:", request.method)
+        print("POST Data:", request.form)
+        if request.method == 'POST':
+            action = request.form.get('action', 'add')
+        else:
+            action = request.args.get('action', 'add')
 
-    print("Action:", action)    
-    roles = Rol.query.all()
-    usuarios = User.query.all()
-    user_to_update = None
+        print("Action:", action)    
+        roles = Rol.query.all()
+        usuarios = User.query.all()
+        user_to_update = None
 
-    form = UserForm()
-    form.rol.choices = [(rol.ID, rol.Nombre) for rol in Rol.query.all()]
-
-    if action == 'change_password':
-        form = ChangePasswordForm()
-        user_to_update = None 
-        user_id = request.form.get('selected_user_id') or request.args.get('user_id')
-        if user_id:
-            user_to_update = User.query.get(user_id)
-            form = ChangePasswordForm(obj=user_to_update)
-            return render_template('gestion_usuarios/actpssw.html', form=form, users=usuarios, user_to_update=user_to_update)
-
-    elif action == 'update':
-        user_id = request.form.get('selected_user_id') or request.args.get('user_id')
-        print("Captured user_id:", user_id)
-        if user_id:
-            print("User ID recibido:", user_id)
-            user_to_update = User.query.get(user_id)
-            print("Usuario seleccionado para actualizar:", user_to_update)
-            print("User ID:", user_id)
-            print("User to Update:", user_to_update)
-        form = UpdateUserForm(obj=user_to_update)
-        form.rol.choices = [(rol.ID, rol.Nombre) for rol in Rol.query.all()]
-    else:
         form = UserForm()
         form.rol.choices = [(rol.ID, rol.Nombre) for rol in Rol.query.all()]
 
-    # Añadir lógica para manejar la selección del usuario
-    if request.method == 'POST' and 'select_user' in request.form:
-        user_id = request.form['user_id']
-        return redirect(url_for('gestion_usuarios', action='update', user_id=user_id))
+        if action == 'change_password':
+            form = ChangePasswordForm()
+            user_to_update = None 
+            user_id = request.form.get('selected_user_id') or request.args.get('user_id')
+            if user_id:
+                user_to_update = User.query.get(user_id)
+                form = ChangePasswordForm(obj=user_to_update)
+                return render_template('gestion_usuarios/actpssw.html', form=form, users=usuarios, user_to_update=user_to_update)
 
-    # Si es POST, ejecuta la función correspondiente
-    if request.method == 'POST':
-        action_function = ACTIONS.get(action)
-        if action_function:
-            result = action_function(form)  # <-- Obtener el resultado de la función
-            if action == 'update' and result:  # <-- Comprobar si el resultado existe (es decir, si hay un user_id)
-                return redirect(url_for('gestion_usuarios', action='update', user_id=result))
+        elif action == 'update':
+            user_id = request.form.get('selected_user_id') or request.args.get('user_id')
+            print("Captured user_id:", user_id)
+            if user_id:
+                print("User ID recibido:", user_id)
+                user_to_update = User.query.get(user_id)
+                print("Usuario seleccionado para actualizar:", user_to_update)
+                print("User ID:", user_id)
+                print("User to Update:", user_to_update)
+            form = UpdateUserForm(obj=user_to_update)
+            form.rol.choices = [(rol.ID, rol.Nombre) for rol in Rol.query.all()]
+        else:
+            form = UserForm()
+            form.rol.choices = [(rol.ID, rol.Nombre) for rol in Rol.query.all()]
 
-    usuarios = User.query.all()
+        # Añadir lógica para manejar la selección del usuario
+        if request.method == 'POST' and 'select_user' in request.form:
+            user_id = request.form['user_id']
+            return redirect(url_for('gestion_usuarios', action='update', user_id=user_id))
 
-    if action == 'delete':
-        return render_template('gestion_usuarios/elimuser.html', users=usuarios)
-    elif action == 'update':
-        return render_template('gestion_usuarios/actuser.html', form=form, users=usuarios, roles=roles, user_to_update=user_to_update)
-    elif action == 'change_password':
-        return render_template('gestion_usuarios/actpssw.html', form=form, users=usuarios, user_to_update=user_to_update)    
-    else:
-        return render_template('gestion_usuarios/useradm.html', form=form, users=usuarios)
+        # Si es POST, ejecuta la función correspondiente
+        if request.method == 'POST':
+            action_function = ACTIONS.get(action)
+            if action_function:
+                result = action_function(form)  # <-- Obtener el resultado de la función
+                if action == 'update' and result:  # <-- Comprobar si el resultado existe (es decir, si hay un user_id)
+                    return redirect(url_for('gestion_usuarios', action='update', user_id=result))
+
+        usuarios = User.query.all()
+
+        if action == 'delete':
+            return render_template('gestion_usuarios/elimuser.html', users=usuarios)
+        elif action == 'update':
+            return render_template('gestion_usuarios/actuser.html', form=form, users=usuarios, roles=roles, user_to_update=user_to_update)
+        elif action == 'change_password':
+            return render_template('gestion_usuarios/actpssw.html', form=form, users=usuarios, user_to_update=user_to_update)    
+        else:
+            return render_template('gestion_usuarios/useradm.html', form=form, users=usuarios)
+        
+    except Exception as e:
+        flash(f"Error durante la gestión de usuarios: {str(e)}", 'error')
+        return redirect(url_for('home'))
 
 @app.route('/carga_datos', methods=['GET', 'POST'])
 @login_required
@@ -751,613 +765,676 @@ def download_db_backup():
 @requires_roles('Administrador', 'Analista')
 def preprocesamiento_prediccion():
 
-    user_folder = os.path.join('src/dataset_pred', current_user.User)
-    date_folder = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    base_folder = os.path.join(user_folder, date_folder)
-    preview_data = pd.DataFrame()
-    
-    
-    if request.method == 'POST':
-        file = request.files.get('file')
-        selected_preproc_id = request.form.get('selected_dataset')
-        if file and allowed_file(file.filename):
-            if not os.path.exists(base_folder):
-                    os.makedirs(base_folder)
+    try:
 
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(base_folder, filename)
-            file.save(file_path)
-            session['uploaded_file_path'] = file_path
-            flash('Archivo subido correctamente', 'success')
-        else:
-            flash('Archivo no permitido', 'error')
-        # Verificar si se seleccionó un dataset preprocesado
-        if selected_preproc_id:
-            selected_preproc = Preprocesamiento.query.get(selected_preproc_id)
-            if selected_preproc and selected_preproc.X_trainPath:
-                session['selected_x_train_path'] = selected_preproc.X_trainPath
+        user_folder = os.path.join('src/dataset_pred', current_user.User)
+        date_folder = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        base_folder = os.path.join(user_folder, date_folder)
+        preview_data = pd.DataFrame()
+        
+        
+        if request.method == 'POST':
+            file = request.files.get('file')
+            selected_preproc_id = request.form.get('selected_dataset')
 
-        # Ejecutar preprocesamiento personalizado
-        if file and selected_preproc_id:
-            uploaded_file_path = session.get('uploaded_file_path')
-            selected_x_train_path = session.get('selected_x_train_path')
+            # Verificar si no se seleccionó un dataset preprocesado
+            if not selected_preproc_id:
+                flash('Por favor seleccione un dataset', 'error')
+                return redirect(url_for('preprocesamiento_prediccion'))
 
-            if uploaded_file_path and selected_x_train_path:
-                df_pred, num_rows, num_columns = realizar_preprocesamiento_pred(uploaded_file_path, selected_x_train_path, base_folder)
-                dataset_name_with_pred = filename.rsplit('.', 1)[0] + '_pred'
+            if file and allowed_file(file.filename):
+                if not os.path.exists(base_folder):
+                        os.makedirs(base_folder)
 
-                if df_pred is not None:
-                    # Construir el mensaje de éxito
-                    preprocessing_message = f"Preprocesamiento realizado con éxito. Filas: {num_rows}, Columnas: {num_columns}"
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(base_folder, filename)
+                file.save(file_path)
+                session['uploaded_file_path'] = file_path
+                flash('Archivo subido correctamente', 'success')
+            else:
+                flash('Archivo no permitido', 'error')
+            # Verificar si se seleccionó un dataset preprocesado
+            if selected_preproc_id:
+                selected_preproc = Preprocesamiento.query.get(selected_preproc_id)
+                if selected_preproc and selected_preproc.X_trainPath:
+                    session['selected_x_train_path'] = selected_preproc.X_trainPath
 
-                    # Guardar el DataFrame preprocesado en un archivo CSV
-                    preprocessed_file_path = os.path.join(base_folder, dataset_name_with_pred + '.csv')
-                    df_pred.to_csv(preprocessed_file_path, index=False)
+            # Ejecutar preprocesamiento personalizado
+            if file and selected_preproc_id:
+                uploaded_file_path = session.get('uploaded_file_path')
+                selected_x_train_path = session.get('selected_x_train_path')
 
-                    fecha = datetime.datetime.strptime(date_folder, '%Y-%m-%d_%H-%M-%S')
-                    
-                    # Crear un nuevo registro en la tabla Preppred
-                    new_preppred = Preppred(
-                        UsuarioID=current_user.ID,
-                        Fecha = fecha,
-                        Comentario=f"Preprocesado para predicción completado. Filas: {num_rows}, Columnas: {num_columns}",
-                        FilePath=preprocessed_file_path,
-                        Nombre=dataset_name_with_pred
-                    )
-                    db.session.add(new_preppred)
-                    db.session.commit()
+                if uploaded_file_path and selected_x_train_path:
+                    df_pred, num_rows, num_columns = realizar_preprocesamiento_pred(uploaded_file_path, selected_x_train_path, base_folder)
+                    dataset_name_with_pred = filename.rsplit('.', 1)[0] + '_pred'
 
-                    flash(preprocessing_message, 'success')
-                else:
-                    flash(preprocessing_message, 'error')
+                    if df_pred is not None:
+                        # Construir el mensaje de éxito
+                        preprocessing_message = f"Preprocesamiento realizado con éxito. Filas: {num_rows}, Columnas: {num_columns}"
 
-    preprocesamientos = Preprocesamiento.query \
-                        .join(User, Preprocesamiento.UsuarioID == User.ID) \
-                        .join(Dataset, Preprocesamiento.DatasetID == Dataset.ID) \
-                        .add_columns(Preprocesamiento.ID, User.User, Dataset.Nombre, Preprocesamiento.Fecha, Preprocesamiento.Comentario) \
+                        # Guardar el DataFrame preprocesado en un archivo CSV
+                        preprocessed_file_path = os.path.join(base_folder, dataset_name_with_pred + '.csv')
+                        df_pred.to_csv(preprocessed_file_path, index=False)
+
+                        fecha = datetime.datetime.strptime(date_folder, '%Y-%m-%d_%H-%M-%S')
+                        
+                        # Crear un nuevo registro en la tabla Preppred
+                        new_preppred = Preppred(
+                            UsuarioID=current_user.ID,
+                            Fecha = fecha,
+                            Comentario=f"Preprocesado para predicción completado. Filas: {num_rows}, Columnas: {num_columns}",
+                            FilePath=preprocessed_file_path,
+                            Nombre=dataset_name_with_pred
+                        )
+                        db.session.add(new_preppred)
+                        db.session.commit()
+
+                        flash(preprocessing_message, 'success')
+                    else:
+                        flash(preprocessing_message, 'error')
+
+        preprocesamientos = Preprocesamiento.query \
+                            .join(User, Preprocesamiento.UsuarioID == User.ID) \
+                            .join(Dataset, Preprocesamiento.DatasetID == Dataset.ID) \
+                            .add_columns(Preprocesamiento.ID, User.User, Dataset.Nombre, Preprocesamiento.Fecha, Preprocesamiento.Comentario) \
+                            .all()
+        
+        preppreds = Preppred.query \
+                        .join(User, Preppred.UsuarioID == User.ID) \
+                        .add_columns(Preppred.Nombre, User.User, Preppred.Fecha, Preppred.Comentario) \
                         .all()
-    
-    preppreds = Preppred.query \
-                    .join(User, Preppred.UsuarioID == User.ID) \
-                    .add_columns(Preppred.Nombre, User.User, Preppred.Fecha, Preppred.Comentario) \
-                    .all()
 
-    return render_template('modelado_predictivo/preprocpred.html', preprocesamientos=preprocesamientos, datasets_listos=preppreds,preview_data=preview_data)
+        return render_template('modelado_predictivo/preprocpred.html', preprocesamientos=preprocesamientos, datasets_listos=preppreds,preview_data=preview_data)
+    
+    except Exception as e:
+        flash(str(e), 'error')
+        return redirect(url_for('home'))
 
 @app.route('/trainxgboost', methods=['GET', 'POST'])
 @login_required
 @requires_roles('Administrador', 'Analista')
 def train_xgboost():
-    preprocesamientos = Preprocesamiento.query \
-                        .options(joinedload(Preprocesamiento.dataset), joinedload(Preprocesamiento.usuario)) \
-                        .all()
-    entrenamientos_xgboost = Trainxgboost.query \
-                            .join(User, Trainxgboost.UsuarioID == User.ID) \
-                            .add_columns(User.User, Trainxgboost.ModeloNombre, Trainxgboost.Fecha, Trainxgboost.Accuracy, Trainxgboost.Recall, Trainxgboost.F1Score) \
+    try:    
+        preprocesamientos = Preprocesamiento.query \
+                            .options(joinedload(Preprocesamiento.dataset), joinedload(Preprocesamiento.usuario)) \
                             .all()
-    resultados = None
-    
-    if request.method == 'POST':
-        preproc_id = request.form.get('selected_preproc')
-        preprocesamiento = Preprocesamiento.query.get(preproc_id)
-
-        if preprocesamiento:
-            # Obtener las rutas de los archivos
-            x_train_path = preprocesamiento.X_trainPath
-            x_test_path = preprocesamiento.X_testPath
-            y_train_path = preprocesamiento.y_trainPath
-            y_test_path = preprocesamiento.y_testPath
-
-            # Ejecutar el entrenamiento de XGBoost
-            modelo, accuracy, recall, f1_score, conf_matrix, report = realizar_xgboost(x_train_path, x_test_path, y_train_path, y_test_path)
-
-            # Guardar resultados para mostrar en la vista
-            resultados = {
-                'conf_matrix': conf_matrix,
-                'report': report,
-                'accuracy': accuracy,
-                'recall': recall,
-                'f1_score': f1_score
-            }
-
-            # Obtener el nombre del dataset
-            dataset_nombre = preprocesamiento.dataset.Nombre
-
-            # Obtener la fecha actual
-            fecha_actual = datetime.datetime.now()
-
-            # Guardar el modelo y los resultados
-            model_path = guardar_modelo(modelo, current_user.User, dataset_nombre, accuracy)
-
-            # Extraer el nombre del archivo del modelo
-            model_name = os.path.basename(model_path)
-
-            # (Necesitas definir y crear el modelo Trainxgboost en tu módulo models)
-            new_train = Trainxgboost(
-                UsuarioID=current_user.ID,
-                DatasetID=preprocesamiento.DatasetID,
-                Accuracy=accuracy,
-                Recall=recall,
-                F1Score=f1_score,
-                ModeloPath=model_path,
-                ModeloNombre=model_name,
-                Fecha=fecha_actual
-            )
-            db.session.add(new_train)
-            db.session.commit()
-
-            return redirect(url_for('train_xgboost'))
+        entrenamientos_xgboost = Trainxgboost.query \
+                                .join(User, Trainxgboost.UsuarioID == User.ID) \
+                                .add_columns(User.User, Trainxgboost.ModeloNombre, Trainxgboost.Fecha, Trainxgboost.Accuracy, Trainxgboost.Recall, Trainxgboost.F1Score) \
+                                .all()
+        resultados = None
         
-    # Al recargar la página, los datos actualizados se mostrarán aquí
-    entrenamientos_xgboost_actualizados = Trainxgboost.query \
-                            .join(User, Trainxgboost.UsuarioID == User.ID) \
-                            .add_columns(User.User, Trainxgboost.ModeloNombre, Trainxgboost.Fecha, Trainxgboost.Accuracy, Trainxgboost.Recall, Trainxgboost.F1Score) \
-                            .all()
+        if request.method == 'POST':
+            preproc_id = request.form.get('selected_preproc')
+            if not preproc_id:
+                flash('Por favor selecciona un dataset para entrenamiento.', 'error')
+                return redirect(url_for('train_xgboost'))  # redirige de nuevo a la misma página para que el usuario pueda seleccionar
+            
+            preprocesamiento = Preprocesamiento.query.get(preproc_id)
 
-    return render_template('modelado_predictivo/trainxgboost.html', preprocesamientos=preprocesamientos, entrenamientos_xgboost=entrenamientos_xgboost_actualizados, resultados=resultados)
+            if preprocesamiento:
+                # Obtener las rutas de los archivos
+                x_train_path = preprocesamiento.X_trainPath
+                x_test_path = preprocesamiento.X_testPath
+                y_train_path = preprocesamiento.y_trainPath
+                y_test_path = preprocesamiento.y_testPath
+
+                # Ejecutar el entrenamiento de XGBoost
+                modelo, accuracy, recall, f1_score, conf_matrix, report = realizar_xgboost(x_train_path, x_test_path, y_train_path, y_test_path)
+
+                # Guardar resultados para mostrar en la vista
+                resultados = {
+                    'conf_matrix': conf_matrix,
+                    'report': report,
+                    'accuracy': accuracy,
+                    'recall': recall,
+                    'f1_score': f1_score
+                }
+
+                # Obtener el nombre del dataset
+                dataset_nombre = preprocesamiento.dataset.Nombre
+
+                # Obtener la fecha actual
+                fecha_actual = datetime.datetime.now()
+
+                # Guardar el modelo y los resultados
+                model_path = guardar_modelo(modelo, current_user.User, dataset_nombre, accuracy)
+
+                # Extraer el nombre del archivo del modelo
+                model_name = os.path.basename(model_path)
+
+                # (Necesitas definir y crear el modelo Trainxgboost en tu módulo models)
+                new_train = Trainxgboost(
+                    UsuarioID=current_user.ID,
+                    DatasetID=preprocesamiento.DatasetID,
+                    Accuracy=accuracy,
+                    Recall=recall,
+                    F1Score=f1_score,
+                    ModeloPath=model_path,
+                    ModeloNombre=model_name,
+                    Fecha=fecha_actual
+                )
+                db.session.add(new_train)
+                db.session.commit()
+
+                flash('Entrenamiento realizado con éxito', 'success')
+                return redirect(url_for('train_xgboost'))
+            
+        # Al recargar la página, los datos actualizados se mostrarán aquí
+        entrenamientos_xgboost_actualizados = Trainxgboost.query \
+                                .join(User, Trainxgboost.UsuarioID == User.ID) \
+                                .add_columns(User.User, Trainxgboost.ModeloNombre, Trainxgboost.Fecha, Trainxgboost.Accuracy, Trainxgboost.Recall, Trainxgboost.F1Score) \
+                                .all()
+
+        return render_template('modelado_predictivo/trainxgboost.html', preprocesamientos=preprocesamientos, entrenamientos_xgboost=entrenamientos_xgboost_actualizados, resultados=resultados)
+    except Exception as e:
+        flash(f"Error durante el entrenamiento: {str(e)}", 'error')
+        return redirect(url_for('home'))
 
 @app.route('/pred_xgboost', methods=['GET', 'POST'])
 @login_required
 @requires_roles('Administrador', 'Analista')
 def pred_xgboost():
-    entrenamientos_xgboost = Trainxgboost.query.all()
-    preppreds = Preppred.query.all()
-    predicciones = Predxgboost.query.all()
-    download_path = session.get('download_path', None)  # Obtener la ruta de descarga desde la sesión
+    try:
+        entrenamientos_xgboost = Trainxgboost.query.all()
+        preppreds = Preppred.query.all()
+        predicciones = Predxgboost.query.all()
+        download_path = session.get('download_path', None)  # Obtener la ruta de descarga desde la sesión
 
-    if request.method == 'GET':
-        session.pop('download_path', None)  # Remueve la ruta de descarga de la sesión si existe
+        if request.method == 'GET':
+            session.pop('download_path', None)  # Remueve la ruta de descarga de la sesión si existe
 
-    if request.method == 'POST':
-        selected_model_id = request.form.get('selected_model')
-        selected_preppred_id = request.form.get('selected_preppred')
-        session['update_predictions'] = True
+        if request.method == 'POST':
+            selected_model_id = request.form.get('selected_model')
+            selected_preppred_id = request.form.get('selected_preppred')
+            session['update_predictions'] = True
 
-        if not selected_model_id or not selected_preppred_id:
-            flash('Debe seleccionar un modelo y un dataset para la predicción.', 'error')
-            return redirect(url_for('pred_xgboost'))
-
-        modelo = Trainxgboost.query.get(selected_model_id)
-        preppred = Preppred.query.get(selected_preppred_id)
-
-        if modelo and preppred:
-            # Cargar el modelo
-            loaded_model = cargar_modelo(modelo.ModeloPath)
-
-            # Cargar el dataset para realizar la predicción
-            pred_dataset = pd.read_csv(preppred.FilePath)
-
-            # Realizar predicción
-            churn_predictions = loaded_model.predict(pred_dataset)
-
-            # Cargar el dataset original (sin el sufijo _pred) para agregar la predicción
-            file_dir = dirname(preppred.FilePath)
-            file_name, file_ext = splitext(basename(preppred.FilePath))
-            original_file_name = file_name.replace('_pred', '')
-            original_file_path = join(file_dir, original_file_name + file_ext)
-
-            original_dataset = pd.read_csv(original_file_path)
-
-            # Asegurarse de que ambos datasets tienen el mismo número de filas
-            if len(churn_predictions) != len(original_dataset):
-                flash('Error: El número de predicciones no coincide con el número de filas en el dataset original.', 'error')
+            if not selected_model_id or not selected_preppred_id:
+                flash('Debe seleccionar un modelo y un dataset para la predicción.', 'error')
                 return redirect(url_for('pred_xgboost'))
 
-            # Agregar la columna de predicción al dataset original
-            original_dataset['churn'] = churn_predictions
+            modelo = Trainxgboost.query.get(selected_model_id)
+            preppred = Preppred.query.get(selected_preppred_id)
 
-            #Fecha actual
-            fecha_actual = datetime.datetime.now()
+            if modelo and preppred:
+                # Cargar el modelo
+                loaded_model = cargar_modelo(modelo.ModeloPath)
 
-            # Carpeta de usuario y fecha
-            user_folder = os.path.join('src/pred_xgboost', current_user.User)
-            user_folder1 = os.path.join('pred_xgboost', current_user.User)
-            date_folder = fecha_actual.strftime('%Y-%m-%d_%H-%M-%S')
-            base_folder = os.path.join(user_folder, date_folder)
+                # Cargar el dataset para realizar la predicción
+                pred_dataset = pd.read_csv(preppred.FilePath)
 
-            base_folderb = os.path.join(user_folder1, date_folder)
+                # Realizar predicción
+                churn_predictions = loaded_model.predict(pred_dataset)
 
-            if not os.path.exists(base_folder):
-                os.makedirs(base_folder)
+                # Cargar el dataset original (sin el sufijo _pred) para agregar la predicción
+                file_dir = dirname(preppred.FilePath)
+                file_name, file_ext = splitext(basename(preppred.FilePath))
+                original_file_name = file_name.replace('_pred', '')
+                original_file_path = join(file_dir, original_file_name + file_ext)
 
-            # Guardar el dataset con predicciones en la ubicación original
-            pred_dataset.to_csv(original_file_path, index=False)
+                original_dataset = pd.read_csv(original_file_path)
 
-            # Guardar el nuevo dataset
-            new_filename = f"{modelo.ModeloNombre}_{preppred.Nombre.replace('_pred', '')}.csv"
-            new_file_path = os.path.join(base_folder, new_filename)
-            new_file_pathb = os.path.join(base_folderb, new_filename)
-            original_dataset.to_csv(new_file_path, index=False)
+                # Asegurarse de que ambos datasets tienen el mismo número de filas
+                if len(churn_predictions) != len(original_dataset):
+                    flash('Error: El número de predicciones no coincide con el número de filas en el dataset original.', 'error')
+                    return redirect(url_for('pred_xgboost'))
 
-            # Registrar la predicción en la base de datos
-            nueva_prediccion = Predxgboost(
-                UsuarioID=current_user.ID,
-                ModeloID=modelo.ID,
-                FilePath=new_file_path,
-                Fecha = fecha_actual,
-                Accuracy=modelo.Accuracy,
-                NombrePrediccion=new_filename,
-                PredFilePath=new_file_pathb
-            )
-            db.session.add(nueva_prediccion)
-            db.session.commit()
+                # Agregar la columna de predicción al dataset original
+                original_dataset['churn'] = churn_predictions
 
-            download_path = new_file_pathb
-            session['download_path'] = download_path
-            flash('Predicción realizada con éxito.', 'success')
+                #Fecha actual
+                fecha_actual = datetime.datetime.now()
 
-        # Asegúrate de recargar la lista de predicciones después de añadir la nueva
-        predicciones = Predxgboost.query.all()
+                # Carpeta de usuario y fecha
+                user_folder = os.path.join('src/pred_xgboost', current_user.User)
+                user_folder1 = os.path.join('pred_xgboost', current_user.User)
+                date_folder = fecha_actual.strftime('%Y-%m-%d_%H-%M-%S')
+                base_folder = os.path.join(user_folder, date_folder)
 
-    else:
-        predicciones = Predxgboost.query.all()
+                base_folderb = os.path.join(user_folder1, date_folder)
 
-    # Pasar download_path desde la sesión si existe
-    download_path = session.get('download_path', None)
+                if not os.path.exists(base_folder):
+                    os.makedirs(base_folder)
 
-    return render_template('modelado_predictivo/predxgboost.html', 
-                           entrenamientos_xgboost=entrenamientos_xgboost, 
-                           preppreds=preppreds, 
-                           predicciones=predicciones,
-                           download_path=download_path)
+                # Guardar el dataset con predicciones en la ubicación original
+                pred_dataset.to_csv(original_file_path, index=False)
+
+                # Guardar el nuevo dataset
+                new_filename = f"{modelo.ModeloNombre}_{preppred.Nombre.replace('_pred', '')}.csv"
+                new_file_path = os.path.join(base_folder, new_filename)
+                new_file_pathb = os.path.join(base_folderb, new_filename)
+                original_dataset.to_csv(new_file_path, index=False)
+
+                # Registrar la predicción en la base de datos
+                nueva_prediccion = Predxgboost(
+                    UsuarioID=current_user.ID,
+                    ModeloID=modelo.ID,
+                    FilePath=new_file_path,
+                    Fecha = fecha_actual,
+                    Accuracy=modelo.Accuracy,
+                    NombrePrediccion=new_filename,
+                    PredFilePath=new_file_pathb
+                )
+                db.session.add(nueva_prediccion)
+                db.session.commit()
+
+                download_path = new_file_pathb
+                session['download_path'] = download_path
+                flash('Predicción realizada con éxito.', 'success')
+
+            # Asegúrate de recargar la lista de predicciones después de añadir la nueva
+            predicciones = Predxgboost.query.all()
+
+        else:
+            predicciones = Predxgboost.query.all()
+
+        # Pasar download_path desde la sesión si existe
+        download_path = session.get('download_path', None)
+
+        return render_template('modelado_predictivo/predxgboost.html', 
+                            entrenamientos_xgboost=entrenamientos_xgboost, 
+                            preppreds=preppreds, 
+                            predicciones=predicciones,
+                            download_path=download_path)
+    except Exception as e:
+        flash(f"Error durante la predicción con XGBoost: {str(e)}", 'error')
+        return redirect(url_for('home'))
 
 
 @app.route('/trainrnn', methods=['GET', 'POST'])
 @login_required
 @requires_roles('Administrador', 'Analista')
 def train_rnn():
-    preprocesamientos = Preprocesamiento.query \
-                        .options(joinedload(Preprocesamiento.dataset), joinedload(Preprocesamiento.usuario)) \
-                        .all()
-    
-    if request.method == 'POST':
-        preproc_id = request.form.get('selected_preproc')
-        preprocesamiento = Preprocesamiento.query.get(preproc_id)
+    try:    
 
-        if preprocesamiento:
-            # Obtener las rutas de los archivos
-            x_train_path = preprocesamiento.X_trainPath
-            x_test_path = preprocesamiento.X_testPath
-            y_train_path = preprocesamiento.y_trainPath
-            y_test_path = preprocesamiento.y_testPath
-
-            # Ejecutar el entrenamiento de RNN
-            modelo, accuracy, recall, f1_score, conf_matrix, report = realizar_rnn(x_train_path, x_test_path, y_train_path, y_test_path)
-
-            # Guardar resultados para mostrar en la vista
-            resultados = {
-                'conf_matrix': conf_matrix,
-                'report': report,
-                'accuracy': accuracy,
-                'recall': recall,
-                'f1_score': f1_score
-            }
-
-            # Obtener el nombre del dataset
-            dataset_nombre = preprocesamiento.dataset.Nombre
-
-            # Obtener la fecha actual
-            fecha_actual = datetime.datetime.now()
-
-            # Guardar el modelo y los resultados
-            model_path = guardar_modelo_rnn(modelo, current_user.User, dataset_nombre, accuracy)
-
-            # Extraer el nombre del archivo del modelo
-            model_name = os.path.basename(model_path)
-
-            new_train = Trainrnn(
-                UsuarioID=current_user.ID,
-                DatasetID=preprocesamiento.DatasetID,
-                Accuracy=accuracy,
-                Recall=recall,
-                F1Score=f1_score,
-                ModeloPath=model_path,
-                ModeloNombre=model_name,
-                Fecha=fecha_actual
-            )
-            db.session.add(new_train)
-            db.session.commit()
-
-            return redirect(url_for('train_rnn'))
-        
-    # Al recargar la página, los datos actualizados se mostrarán aquí
-    entrenamientos_rnn_actualizados = Trainrnn.query \
-                            .join(User, Trainrnn.UsuarioID == User.ID) \
-                            .add_columns(User.User, Trainrnn.ModeloNombre, Trainrnn.Fecha, Trainrnn.Accuracy, Trainrnn.Recall, Trainrnn.F1Score) \
+        preprocesamientos = Preprocesamiento.query \
+                            .options(joinedload(Preprocesamiento.dataset), joinedload(Preprocesamiento.usuario)) \
                             .all()
+        
+        if request.method == 'POST':
+            preproc_id = request.form.get('selected_preproc')
 
-    return render_template('modelado_predictivo/trainrnn.html', preprocesamientos=preprocesamientos, entrenamientos_rnn=entrenamientos_rnn_actualizados)
+            if not preproc_id:
+                    flash('Por favor selecciona un dataset para entrenamiento.', 'error')
+                    return redirect(url_for('train_rnn'))
 
+            preprocesamiento = Preprocesamiento.query.get(preproc_id)
+
+            if preprocesamiento:
+                # Obtener las rutas de los archivos
+                x_train_path = preprocesamiento.X_trainPath
+                x_test_path = preprocesamiento.X_testPath
+                y_train_path = preprocesamiento.y_trainPath
+                y_test_path = preprocesamiento.y_testPath
+
+                # Ejecutar el entrenamiento de RNN
+                modelo, accuracy, recall, f1_score, conf_matrix, report = realizar_rnn(x_train_path, x_test_path, y_train_path, y_test_path)
+
+                # Guardar resultados para mostrar en la vista
+                resultados = {
+                    'conf_matrix': conf_matrix,
+                    'report': report,
+                    'accuracy': accuracy,
+                    'recall': recall,
+                    'f1_score': f1_score
+                }
+
+                # Obtener el nombre del dataset
+                dataset_nombre = preprocesamiento.dataset.Nombre
+
+                # Obtener la fecha actual
+                fecha_actual = datetime.datetime.now()
+
+                # Guardar el modelo y los resultados
+                model_path = guardar_modelo_rnn(modelo, current_user.User, dataset_nombre, accuracy)
+
+                # Extraer el nombre del archivo del modelo
+                model_name = os.path.basename(model_path)
+
+                new_train = Trainrnn(
+                    UsuarioID=current_user.ID,
+                    DatasetID=preprocesamiento.DatasetID,
+                    Accuracy=accuracy,
+                    Recall=recall,
+                    F1Score=f1_score,
+                    ModeloPath=model_path,
+                    ModeloNombre=model_name,
+                    Fecha=fecha_actual
+                )
+                db.session.add(new_train)
+                db.session.commit()
+
+                flash('Entrenamiento realizado con éxito', 'success')
+                return redirect(url_for('train_rnn'))
+            
+        # Al recargar la página, los datos actualizados se mostrarán aquí
+        entrenamientos_rnn_actualizados = Trainrnn.query \
+                                .join(User, Trainrnn.UsuarioID == User.ID) \
+                                .add_columns(User.User, Trainrnn.ModeloNombre, Trainrnn.Fecha, Trainrnn.Accuracy, Trainrnn.Recall, Trainrnn.F1Score) \
+                                .all()
+
+        return render_template('modelado_predictivo/trainrnn.html', preprocesamientos=preprocesamientos, entrenamientos_rnn=entrenamientos_rnn_actualizados)
+    
+    except Exception as e:
+        flash(f"Error durante el entrenamiento: {str(e)}", 'error')
+        return redirect(url_for('home'))
+    
 @app.route('/pred_rnn', methods=['GET', 'POST'])
 @login_required
 @requires_roles('Administrador', 'Analista')
 def pred_rnn():
-
-    entrenamientos_xgboost = Trainrnn.query.all()
-    preppreds = Preppred.query.all()
-    predicciones = Predxgboost.query.all()
-    download_path = session.get('download_path', None)  # Obtener la ruta de descarga desde la sesión
-
-    if request.method == 'GET':
-        session.pop('download_path', None)  # Remueve la ruta de descarga de la sesión si existe
-
-    if request.method == 'POST':
-        selected_model_id = request.form.get('selected_model')
-        selected_preppred_id = request.form.get('selected_preppred')
-        session['update_predictions'] = True
-
-        if not selected_model_id or not selected_preppred_id:
-            flash('Debe seleccionar un modelo y un dataset para la predicción.', 'error')
-            return redirect(url_for('pred_xgboost'))
-
-        modelo = Trainrnn.query.get(selected_model_id)
-        preppred = Preppred.query.get(selected_preppred_id)
-
-        if modelo and preppred:
-            # Cargar el modelo
-            loaded_model = cargar_modelo_rnn(modelo.ModeloPath)
-
-            # Cargar el dataset para realizar la predicción
-            pred_dataset = pd.read_csv(preppred.FilePath)
-            pred_dataset_rnn = np.reshape(pred_dataset.values, (pred_dataset.shape[0], 1, pred_dataset.shape[1]))
-
-            # Realizar predicción
-            churn_predictions_probabilities = loaded_model.predict(pred_dataset_rnn)
-
-            # Aplicar umbral para convertir probabilidades en clasificaciones binarias
-            churn_classifications = (churn_predictions_probabilities > 0.5).astype(int)
-
-            # Cargar el dataset original (sin el sufijo _pred) para agregar la predicción
-            file_dir = dirname(preppred.FilePath)
-            file_name, file_ext = splitext(basename(preppred.FilePath))
-            original_file_name = file_name.replace('_pred', '')
-            original_file_path = join(file_dir, original_file_name + file_ext)
-
-            original_dataset = pd.read_csv(original_file_path)
-
-            # Asegurarse de que ambos datasets tienen el mismo número de filas
-            if len(churn_classifications) != len(original_dataset):
-                flash('Error: El número de predicciones no coincide con el número de filas en el dataset original.', 'error')
-                return redirect(url_for('pred_rnn'))
-
-            # Agregar la columna de predicción al dataset original
-            original_dataset['churn'] = churn_classifications.squeeze()
-
-            #Fecha actual
-            fecha_actual = datetime.datetime.now()
-
-            # Carpeta de usuario y fecha
-            user_folder = os.path.join('src/pred_xgboost', current_user.User)
-            user_folder1 = os.path.join('pred_xgboost', current_user.User)
-            date_folder = fecha_actual.strftime('%Y-%m-%d_%H-%M-%S')
-            base_folder = os.path.join(user_folder, date_folder)
-
-            base_folderb = os.path.join(user_folder1, date_folder)
-
-            if not os.path.exists(base_folder):
-                os.makedirs(base_folder)
-
-            # Guardar el dataset con predicciones en la ubicación original
-            pred_dataset.to_csv(original_file_path, index=False)
-
-            # Guardar el nuevo dataset
-            new_filename = f"{modelo.ModeloNombre}_{preppred.Nombre.replace('_pred', '')}.csv"
-            new_file_path = os.path.join(base_folder, new_filename)
-            new_file_pathb = os.path.join(base_folderb, new_filename)
-            original_dataset.to_csv(new_file_path, index=False)
-
-            # Registrar la predicción en la base de datos
-            nueva_prediccion = Predxgboost(
-                UsuarioID=current_user.ID,
-                ModeloID=modelo.ID,
-                FilePath=new_file_path,
-                Fecha = fecha_actual,
-                Accuracy=modelo.Accuracy,
-                NombrePrediccion=new_filename,
-                PredFilePath=new_file_pathb
-            )
-            db.session.add(nueva_prediccion)
-            db.session.commit()
-
-            download_path = new_file_pathb
-            session['download_path'] = download_path
-            flash('Predicción realizada con éxito.', 'success')
-
-        # Asegúrate de recargar la lista de predicciones después de añadir la nueva
+    try:
+        entrenamientos_xgboost = Trainrnn.query.all()
+        preppreds = Preppred.query.all()
         predicciones = Predxgboost.query.all()
+        download_path = session.get('download_path', None)  # Obtener la ruta de descarga desde la sesión
 
-    else:
-        predicciones = Predxgboost.query.all()
+        if request.method == 'GET':
+            session.pop('download_path', None)  # Remueve la ruta de descarga de la sesión si existe
 
-   # Pasar download_path desde la sesión si existe
-    download_path = session.get('download_path', None)
+        if request.method == 'POST':
+            selected_model_id = request.form.get('selected_model')
+            selected_preppred_id = request.form.get('selected_preppred')
+            session['update_predictions'] = True
 
-    return render_template('modelado_predictivo/predrnn.html', 
-                           entrenamientos_xgboost=entrenamientos_xgboost, 
-                           preppreds=preppreds, 
-                           predicciones=predicciones,
-                           download_path=download_path)
+            if not selected_model_id or not selected_preppred_id:
+                flash('Debe seleccionar un modelo y un dataset para la predicción.', 'error')
+                return redirect(url_for('pred_xgboost'))
+
+            modelo = Trainrnn.query.get(selected_model_id)
+            preppred = Preppred.query.get(selected_preppred_id)
+
+            if modelo and preppred:
+                # Cargar el modelo
+                loaded_model = cargar_modelo_rnn(modelo.ModeloPath)
+
+                # Cargar el dataset para realizar la predicción
+                pred_dataset = pd.read_csv(preppred.FilePath)
+                pred_dataset_rnn = np.reshape(pred_dataset.values, (pred_dataset.shape[0], 1, pred_dataset.shape[1]))
+
+                # Realizar predicción
+                churn_predictions_probabilities = loaded_model.predict(pred_dataset_rnn)
+
+                # Aplicar umbral para convertir probabilidades en clasificaciones binarias
+                churn_classifications = (churn_predictions_probabilities > 0.5).astype(int)
+
+                # Cargar el dataset original (sin el sufijo _pred) para agregar la predicción
+                file_dir = dirname(preppred.FilePath)
+                file_name, file_ext = splitext(basename(preppred.FilePath))
+                original_file_name = file_name.replace('_pred', '')
+                original_file_path = join(file_dir, original_file_name + file_ext)
+
+                original_dataset = pd.read_csv(original_file_path)
+
+                # Asegurarse de que ambos datasets tienen el mismo número de filas
+                if len(churn_classifications) != len(original_dataset):
+                    flash('Error: El número de predicciones no coincide con el número de filas en el dataset original.', 'error')
+                    return redirect(url_for('pred_rnn'))
+
+                # Agregar la columna de predicción al dataset original
+                original_dataset['churn'] = churn_classifications.squeeze()
+
+                #Fecha actual
+                fecha_actual = datetime.datetime.now()
+
+                # Carpeta de usuario y fecha
+                user_folder = os.path.join('src/pred_xgboost', current_user.User)
+                user_folder1 = os.path.join('pred_xgboost', current_user.User)
+                date_folder = fecha_actual.strftime('%Y-%m-%d_%H-%M-%S')
+                base_folder = os.path.join(user_folder, date_folder)
+
+                base_folderb = os.path.join(user_folder1, date_folder)
+
+                if not os.path.exists(base_folder):
+                    os.makedirs(base_folder)
+
+                # Guardar el dataset con predicciones en la ubicación original
+                pred_dataset.to_csv(original_file_path, index=False)
+
+                # Guardar el nuevo dataset
+                new_filename = f"{modelo.ModeloNombre}_{preppred.Nombre.replace('_pred', '')}.csv"
+                new_file_path = os.path.join(base_folder, new_filename)
+                new_file_pathb = os.path.join(base_folderb, new_filename)
+                original_dataset.to_csv(new_file_path, index=False)
+
+                # Registrar la predicción en la base de datos
+                nueva_prediccion = Predxgboost(
+                    UsuarioID=current_user.ID,
+                    ModeloID=modelo.ID,
+                    FilePath=new_file_path,
+                    Fecha = fecha_actual,
+                    Accuracy=modelo.Accuracy,
+                    NombrePrediccion=new_filename,
+                    PredFilePath=new_file_pathb
+                )
+                db.session.add(nueva_prediccion)
+                db.session.commit()
+
+                download_path = new_file_pathb
+                session['download_path'] = download_path
+                flash('Predicción realizada con éxito.', 'success')
+
+            # Asegúrate de recargar la lista de predicciones después de añadir la nueva
+            predicciones = Predxgboost.query.all()
+
+        else:
+            predicciones = Predxgboost.query.all()
+
+    # Pasar download_path desde la sesión si existe
+        download_path = session.get('download_path', None)
+
+        return render_template('modelado_predictivo/predrnn.html', 
+                            entrenamientos_xgboost=entrenamientos_xgboost, 
+                            preppreds=preppreds, 
+                            predicciones=predicciones,
+                            download_path=download_path)
+    except Exception as e:
+        flash(f"Error durante la predicción con RNN: {str(e)}", 'error')
+        return redirect(url_for('home'))
 
 @app.route('/train_hyb', methods=['GET', 'POST'])
 @login_required
 @requires_roles('Administrador', 'Analista')
 def train_hyb():
-    preprocesamientos = Preprocesamiento.query \
-                        .options(joinedload(Preprocesamiento.dataset), joinedload(Preprocesamiento.usuario)) \
-                        .all()
+    try:    
     
-    if request.method == 'POST':
-        preproc_id = request.form.get('selected_preproc')
-        preprocesamiento = Preprocesamiento.query.get(preproc_id)
-
-        if preprocesamiento:
-            # Obtener las rutas de los archivos
-            x_train_path = preprocesamiento.X_trainPath
-            x_test_path = preprocesamiento.X_testPath
-            y_train_path = preprocesamiento.y_trainPath
-            y_test_path = preprocesamiento.y_testPath
-
-            # Ejecutar el entrenamiento de RNN
-            xgb_model, rnn_model, accuracy, recall, f1_score, conf_matrix, report = realizar_hyb(x_train_path, x_test_path, y_train_path, y_test_path)
-
-            # Guardar resultados para mostrar en la vista
-            resultados = {
-                'conf_matrix': conf_matrix,
-                'report': report,
-                'accuracy': accuracy,
-                'recall': recall,
-                'f1_score': f1_score
-            }
-
-            # Obtener el nombre del dataset
-            dataset_nombre = preprocesamiento.dataset.Nombre
-
-            # Obtener la fecha actual
-            fecha_actual = datetime.datetime.now()
-
-            # Guardar modelo xgb y los resultados
-            model_path_xgb, model_path_rnn = guardar_modelo_hibrido(xgb_model, rnn_model, current_user.User, dataset_nombre, accuracy)
-
-            # Extraer el nombre del archivo del modelo para cada modelo
-            model_name_xgb = os.path.basename(model_path_xgb)
-            model_name_rnn = os.path.basename(model_path_rnn)
-
-            model_name_hybrid = f"{model_name_xgb}_AND_{model_name_rnn}"
-
-            new_train = Trainhybrid(
-                UsuarioID=current_user.ID,
-                DatasetID=preprocesamiento.DatasetID,
-                Accuracy=accuracy,
-                Recall=recall,
-                F1Score=f1_score,
-                ModeloxgbPath=model_path_xgb,
-                ModelornnPath=model_path_rnn,
-                ModeloNombre=model_name_hybrid,
-                Fecha=fecha_actual
-            )
-            db.session.add(new_train)
-            db.session.commit()
-
-            return redirect(url_for('train_hyb'))
-        
-    # Al recargar la página, los datos actualizados se mostrarán aquí
-    entrenamientos_hyb_actualizados = Trainhybrid.query \
-                            .join(User, Trainhybrid.UsuarioID == User.ID) \
-                            .add_columns(User.User, Trainhybrid.ModeloNombre, Trainhybrid.Fecha, Trainhybrid.Accuracy, Trainhybrid.Recall, Trainhybrid.F1Score) \
+        preprocesamientos = Preprocesamiento.query \
+                            .options(joinedload(Preprocesamiento.dataset), joinedload(Preprocesamiento.usuario)) \
                             .all()
+        
+        if request.method == 'POST':
+            preproc_id = request.form.get('selected_preproc')
+            if not preproc_id:
+                    flash('Por favor selecciona un dataset para entrenamiento.', 'error')
+                    return redirect(url_for('train_hyb'))
+            
+            preprocesamiento = Preprocesamiento.query.get(preproc_id)
 
-    return render_template('modelado_predictivo/trainhybrid.html', preprocesamientos=preprocesamientos, entrenamientos_hyb=entrenamientos_hyb_actualizados)
+            if preprocesamiento:
+                # Obtener las rutas de los archivos
+                x_train_path = preprocesamiento.X_trainPath
+                x_test_path = preprocesamiento.X_testPath
+                y_train_path = preprocesamiento.y_trainPath
+                y_test_path = preprocesamiento.y_testPath
+
+                # Ejecutar el entrenamiento de RNN
+                xgb_model, rnn_model, accuracy, recall, f1_score, conf_matrix, report = realizar_hyb(x_train_path, x_test_path, y_train_path, y_test_path)
+
+                # Guardar resultados para mostrar en la vista
+                resultados = {
+                    'conf_matrix': conf_matrix,
+                    'report': report,
+                    'accuracy': accuracy,
+                    'recall': recall,
+                    'f1_score': f1_score
+                }
+
+                # Obtener el nombre del dataset
+                dataset_nombre = preprocesamiento.dataset.Nombre
+
+                # Obtener la fecha actual
+                fecha_actual = datetime.datetime.now()
+
+                # Guardar modelo xgb y los resultados
+                model_path_xgb, model_path_rnn = guardar_modelo_hibrido(xgb_model, rnn_model, current_user.User, dataset_nombre, accuracy)
+
+                # Extraer el nombre del archivo del modelo para cada modelo
+                model_name_xgb = os.path.basename(model_path_xgb)
+                model_name_rnn = os.path.basename(model_path_rnn)
+
+                model_name_hybrid = f"{model_name_xgb}_AND_{model_name_rnn}"
+
+                new_train = Trainhybrid(
+                    UsuarioID=current_user.ID,
+                    DatasetID=preprocesamiento.DatasetID,
+                    Accuracy=accuracy,
+                    Recall=recall,
+                    F1Score=f1_score,
+                    ModeloxgbPath=model_path_xgb,
+                    ModelornnPath=model_path_rnn,
+                    ModeloNombre=model_name_hybrid,
+                    Fecha=fecha_actual
+                )
+                db.session.add(new_train)
+                db.session.commit()
+
+                flash('Entrenamiento realizado con éxito', 'success')
+                return redirect(url_for('train_hyb'))
+            
+        # Al recargar la página, los datos actualizados se mostrarán aquí
+        entrenamientos_hyb_actualizados = Trainhybrid.query \
+                                .join(User, Trainhybrid.UsuarioID == User.ID) \
+                                .add_columns(User.User, Trainhybrid.ModeloNombre, Trainhybrid.Fecha, Trainhybrid.Accuracy, Trainhybrid.Recall, Trainhybrid.F1Score) \
+                                .all()
+
+        return render_template('modelado_predictivo/trainhybrid.html', preprocesamientos=preprocesamientos, entrenamientos_hyb=entrenamientos_hyb_actualizados)
+    
+    except Exception as e:
+        flash(f"Error durante el entrenamiento: {str(e)}", 'error')
+        return redirect(url_for('home'))
 
 @app.route('/pred_hyb', methods=['GET', 'POST'])
 @login_required
 @requires_roles('Administrador', 'Analista')
 def pred_hyb():
-    entrenamientos_hybrid = Trainhybrid.query.all()
-    preppreds = Preppred.query.all()
-    predicciones = Predxgboost.query.all()
-    download_path = session.get('download_path', None)  # Obtener la ruta de descarga desde la sesión
+    try:
+        entrenamientos_hybrid = Trainhybrid.query.all()
+        preppreds = Preppred.query.all()
+        predicciones = Predxgboost.query.all()
+        download_path = session.get('download_path', None)  # Obtener la ruta de descarga desde la sesión
 
-    if request.method == 'GET':
-        session.pop('download_path', None)  # Remueve la ruta de descarga de la sesión si existe
-    
-    if request.method == 'POST':
-        selected_model_id = request.form.get('selected_model')
-        selected_preppred_id = request.form.get('selected_preppred')
-        session['update_predictions'] = True
+        if request.method == 'GET':
+            session.pop('download_path', None)  # Remueve la ruta de descarga de la sesión si existe
+        
+        if request.method == 'POST':
+            selected_model_id = request.form.get('selected_model')
+            selected_preppred_id = request.form.get('selected_preppred')
+            session['update_predictions'] = True
 
-        if not selected_model_id or not selected_preppred_id:
-            flash('Debe seleccionar un modelo y un dataset para la predicción.', 'error')
-            return redirect(url_for('pred_hyb'))
-
-        modelo = Trainhybrid.query.get(selected_model_id)
-        preppred = Preppred.query.get(selected_preppred_id)
-
-        if modelo and preppred:
-            # Cargar el modelo
-            xgb_model_path = modelo.ModeloxgbPath
-            rnn_model_path = modelo.ModelornnPath
-            pred_dataset = pd.read_csv(preppred.FilePath)
-            resultados_prediccion = predecir_con_modelo_hibrido(xgb_model_path, rnn_model_path, pd.read_csv(preppred.FilePath))
-
-            # Cargar el dataset original (sin el sufijo _pred) para agregar la predicción
-            file_dir = dirname(preppred.FilePath)
-            file_name, file_ext = splitext(basename(preppred.FilePath))
-            original_file_name = file_name.replace('_pred', '')
-            original_file_path = join(file_dir, original_file_name + file_ext)
-
-            original_dataset = pd.read_csv(original_file_path)
-
-            # Asegurarse de que ambos datasets tienen el mismo número de filas
-            if len(resultados_prediccion) != len(original_dataset):
-                flash('Error: El número de predicciones no coincide con el número de filas en el dataset original.', 'error')
+            if not selected_model_id or not selected_preppred_id:
+                flash('Debe seleccionar un modelo y un dataset para la predicción.', 'error')
                 return redirect(url_for('pred_hyb'))
 
-            # Agregar la columna de predicción al dataset original
-            original_dataset['churn'] = resultados_prediccion
+            modelo = Trainhybrid.query.get(selected_model_id)
+            preppred = Preppred.query.get(selected_preppred_id)
 
-            #Fecha actual
-            fecha_actual = datetime.datetime.now()
+            if modelo and preppred:
+                # Cargar el modelo
+                xgb_model_path = modelo.ModeloxgbPath
+                rnn_model_path = modelo.ModelornnPath
+                pred_dataset = pd.read_csv(preppred.FilePath)
+                resultados_prediccion = predecir_con_modelo_hibrido(xgb_model_path, rnn_model_path, pd.read_csv(preppred.FilePath))
 
-            # Carpeta de usuario y fecha
-            user_folder = os.path.join('src/pred_xgboost', current_user.User)
-            user_folder1 = os.path.join('pred_xgboost', current_user.User)
-            date_folder = fecha_actual.strftime('%Y-%m-%d_%H-%M-%S')
-            base_folder = os.path.join(user_folder, date_folder)
+                # Cargar el dataset original (sin el sufijo _pred) para agregar la predicción
+                file_dir = dirname(preppred.FilePath)
+                file_name, file_ext = splitext(basename(preppred.FilePath))
+                original_file_name = file_name.replace('_pred', '')
+                original_file_path = join(file_dir, original_file_name + file_ext)
 
-            base_folderb = os.path.join(user_folder1, date_folder)
+                original_dataset = pd.read_csv(original_file_path)
 
-            if not os.path.exists(base_folder):
-                os.makedirs(base_folder)
+                # Asegurarse de que ambos datasets tienen el mismo número de filas
+                if len(resultados_prediccion) != len(original_dataset):
+                    flash('Error: El número de predicciones no coincide con el número de filas en el dataset original.', 'error')
+                    return redirect(url_for('pred_hyb'))
 
-            # Guardar el dataset con predicciones en la ubicación original
-            pred_dataset.to_csv(original_file_path, index=False)
+                # Agregar la columna de predicción al dataset original
+                original_dataset['churn'] = resultados_prediccion
 
-            # Guardar el nuevo dataset
-            new_filename = f"{modelo.ModeloNombre}_{preppred.Nombre.replace('_pred', '')}.csv"
-            new_file_path = os.path.join(base_folder, new_filename)
-            new_file_pathb = os.path.join(base_folderb, new_filename)
-            original_dataset.to_csv(new_file_path, index=False)
+                #Fecha actual
+                fecha_actual = datetime.datetime.now()
 
-            # Registrar la predicción en la base de datos
-            nueva_prediccion = Predxgboost(
-                UsuarioID=current_user.ID,
-                ModeloID=modelo.ID,
-                FilePath=new_file_path,
-                Fecha = fecha_actual,
-                Accuracy=modelo.Accuracy,
-                NombrePrediccion=new_filename,
-                PredFilePath=new_file_pathb
-            )
-            db.session.add(nueva_prediccion)
-            db.session.commit()
+                # Carpeta de usuario y fecha
+                user_folder = os.path.join('src/pred_xgboost', current_user.User)
+                user_folder1 = os.path.join('pred_xgboost', current_user.User)
+                date_folder = fecha_actual.strftime('%Y-%m-%d_%H-%M-%S')
+                base_folder = os.path.join(user_folder, date_folder)
 
-            download_path = new_file_pathb
-            session['download_path'] = download_path
-            flash('Predicción realizada con éxito.', 'success')
+                base_folderb = os.path.join(user_folder1, date_folder)
 
-        # Asegúrate de recargar la lista de predicciones después de añadir la nueva
-        predicciones = Predxgboost.query.all()
+                if not os.path.exists(base_folder):
+                    os.makedirs(base_folder)
 
-    else:
-        predicciones = Predxgboost.query.all()
+                # Guardar el dataset con predicciones en la ubicación original
+                pred_dataset.to_csv(original_file_path, index=False)
 
-    # Pasar download_path desde la sesión si existe
-    download_path = session.get('download_path', None)
+                # Guardar el nuevo dataset
+                new_filename = f"{modelo.ModeloNombre}_{preppred.Nombre.replace('_pred', '')}.csv"
+                new_file_path = os.path.join(base_folder, new_filename)
+                new_file_pathb = os.path.join(base_folderb, new_filename)
+                original_dataset.to_csv(new_file_path, index=False)
 
-    return render_template('modelado_predictivo/predhybrid.html', 
-                           entrenamientos_hybrid=entrenamientos_hybrid, 
-                           preppreds=preppreds, 
-                           predicciones=predicciones,
-                           download_path=download_path)
+                # Registrar la predicción en la base de datos
+                nueva_prediccion = Predxgboost(
+                    UsuarioID=current_user.ID,
+                    ModeloID=modelo.ID,
+                    FilePath=new_file_path,
+                    Fecha = fecha_actual,
+                    Accuracy=modelo.Accuracy,
+                    NombrePrediccion=new_filename,
+                    PredFilePath=new_file_pathb
+                )
+                db.session.add(nueva_prediccion)
+                db.session.commit()
 
-@app.route('/reporte', methods=['GET'])
+                download_path = new_file_pathb
+                session['download_path'] = download_path
+                flash('Predicción realizada con éxito.', 'success')
+
+            # Asegúrate de recargar la lista de predicciones después de añadir la nueva
+            predicciones = Predxgboost.query.all()
+
+        else:
+            predicciones = Predxgboost.query.all()
+
+        # Pasar download_path desde la sesión si existe
+        download_path = session.get('download_path', None)
+
+        return render_template('modelado_predictivo/predhybrid.html', 
+                            entrenamientos_hybrid=entrenamientos_hybrid, 
+                            preppreds=preppreds, 
+                            predicciones=predicciones,
+                            download_path=download_path)
+    except Exception as e:
+        flash(f"Error durante la predicción híbrida: {str(e)}", 'error')
+        return redirect(url_for('home'))
+
+@app.route('/reporte', methods=['GET', 'POST'])
 @login_required
 @requires_roles('Administrador', 'Analista', 'Gerente')
 def reporte():
-    predicciones = Predxgboost.query.all()
-    for pred in predicciones:
-        pred.Accuracy = round(pred.Accuracy, 3)  # Redondear el accuracy a 3 decimales
-    return render_template('visualizacion/reporte.html', predicciones=predicciones)
+    try:
+        predicciones = Predxgboost.query.all()
+        if request.method == 'POST':
+            selected_path = request.form.get('path')
+            if not selected_path:
+                flash("Seleccione una predicción para descargar", 'error')
+                return render_template('visualizacion/reporte.html', predicciones=predicciones)
+            return redirect(url_for('download_file', path=selected_path, source='reporte'))
+        return render_template('visualizacion/reporte.html', predicciones=predicciones)
+    except Exception as e:
+        flash(f"Error al cargar el reporte: {str(e)}", 'error')
+        return redirect(url_for('home'))
 
 if __name__ == '__main__':
     create_default_roles()  # Asegura que existan los roles por defecto
