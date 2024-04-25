@@ -56,7 +56,7 @@ def requires_roles(*roles):
     return wrapper
 
 app = Flask(__name__)
-app.config.from_object(config['development'])
+app.config.from_object(config['production'])
 
 # Flask-Login setup
 login_manager = LoginManager()

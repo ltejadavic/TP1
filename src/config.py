@@ -6,6 +6,13 @@ class DevelopmentConfig():
     SQLALCHEMY_DATABASE_URI = 'sqlite:///retainai.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+class ProductionConfig(Config):
+    DEBUG = False
+    SQLALCHEMY_ECHO = False
+    # Asegúrate de establecer la URI de la base de datos para producción
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///retainai.db'  # Cambia esta línea según sea necesario  
+
 config = {
-    'development': DevelopmentConfig
+    'development': DevelopmentConfig,
+    'production': ProductionConfig
 }    
