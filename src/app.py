@@ -365,8 +365,10 @@ def download_file():
     try:
         path = request.args.get('path')
         source = request.args.get('source')
-        if path:
-            return send_file(path, as_attachment=True)
+        # Preponer 'src/' a la ruta obtenida
+        full_path = os.path.join('src', path) if path else None
+        if full_path:
+            return send_file(full_path, as_attachment=True)
         elif source == 'reporte':
             flash("Seleccione una predicción para descargar", 'error')
             return redirect(url_for('reporte'))

@@ -53,8 +53,8 @@
                 </div>
                 <div id="dropdownMenu" class="dropdown-content">
                     <a href="{{ url_for('logout') }}">Logout</a>
-                    <a href="#">Ayuda</a>
-                    <a href="#">Reportar un problema</a>
+                    <a href="mailto:soporte@retainai.com?Subject=Ayuda%20con%20la%20aplicación&Body=Hola%2C%20tengo%20un%20problema%20con%20la%20aplicación%20y%20necesito%20asistencia.">Ayuda</a>
+                    <a href="mailto:soporte@retainai.com?Subject=Necesito%20reportar%20un%20problema&Body=Hola%2C%20necesito%20reportar%20un%20problema%20con%20la%20siguiente%20información:">Reportar un problema</a>
                 </div>
             </div>
 
@@ -109,18 +109,18 @@
                                 {{ form.csrf_token }}
                                 <input type="hidden" name="action" value="add">
                                 <div class="mb-3">
-                                    <label for="User" class="form-label">User</label>
-                                    {{ form.User(class="form-control", placeholder="User") }}
+                                    <label for="User" class="form-label">Usuario</label>
+                                    {{ form.User(class="form-control", placeholder="Usuario") }}
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label for="Password" class="form-label">Password</label>
-                                    {{ form.Password(class="form-control", placeholder="Password") }}
+                                    <label for="Password" class="form-label">Contraseña</label>
+                                    {{ form.Password(class="form-control", placeholder="Contraseña") }}
                                 </div>
                 
                                 <div class="mb-3">
                                     <label for="Email" class="form-label">Email</label>
-                                    {{ form.Email(class="form-control", placeholder="Email") }}
+                                    {{ form.Email(class="form-control", placeholder="Email", pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$", title="Please enter a valid email address.") }}
                                 </div>
                 
                                 <div class="mb-3">

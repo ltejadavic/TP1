@@ -34,6 +34,17 @@
                 currentActionList.style.display = "none";
             }
         }
+
+        function confirmDelete() {
+            const selectedUser = document.querySelector('input[name="user_id_to_delete"]:checked');
+            if (!selectedUser) {
+                alert("Por favor, selecciona un usuario para eliminar.");
+                return false;  // Prevenir el envío del formulario
+            }
+            const confirmation = confirm("¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer y solo se podrá recuperar contactando con soporte de RetainAI.");
+            return confirmation;  // true enviará el formulario, false lo detendrá
+        }   
+
       </script>
       <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
       <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -52,8 +63,8 @@
                 </div>
                 <div id="dropdownMenu" class="dropdown-content">
                     <a href="{{ url_for('logout') }}">Logout</a>
-                    <a href="#">Ayuda</a>
-                    <a href="#">Reportar un problema</a>
+                    <a href="mailto:soporte@retainai.com?Subject=Ayuda%20con%20la%20aplicación&Body=Hola%2C%20tengo%20un%20problema%20con%20la%20aplicación%20y%20necesito%20asistencia.">Ayuda</a>
+                    <a href="mailto:soporte@retainai.com?Subject=Necesito%20reportar%20un%20problema&Body=Hola%2C%20necesito%20reportar%20un%20problema%20con%20la%20siguiente%20información:">Reportar un problema</a>
                 </div>
             </div>
 
@@ -128,7 +139,7 @@
                                 </tbody>
                             </table>
                             <input type="hidden" name="action" value="delete">
-                            <button type="submit" class="btn btn-danger mt-3">Eliminar usuario</button>
+                            <button type="submit" class="btn btn-danger mt-3" onclick="return confirmDelete()">Eliminar usuario</button>
                         </form>
                         </div>
                         {% with messages = get_flashed_messages() %}
