@@ -758,15 +758,9 @@ def backup():
 
 @app.route('/download_db_backup')
 def download_db_backup():
-    try:
-        db_path = 'retainai.db'  # Asegura que este nombre es correcto
-        directory = '/home/ec2-user/RetainaiWebApp/instance' # Asegura que este path es correcto
-        print(f"Directorio actual: {os.getcwd()}")  # Imprime el directorio actual para depuración
-        print(f"Ruta completa: {os.path.join(directory, db_path)}")  # Imprime la ruta completa para depuración
-        return send_from_directory(directory, db_path, as_attachment=True, download_name='backup_retainai.db')
-    except Exception as e:
-        flash(str(e), 'error')
-        return redirect(url_for('home'))
+    db_path = 'retainai.db'  # Verifica que esta ruta es correcta y ajusta si es necesario
+    directory = os.path.join(os.getcwd(), 'instance')  # Ajusta si tu archivo está en 'instance' o en otro directorio
+    return send_from_directory(directory, db_path, as_attachment=True, download_name='backup_retainai.db')
 
 @app.route('/preprocesamiento_prediccion', methods=['GET', 'POST'])
 @login_required
@@ -1447,4 +1441,4 @@ def reporte():
 if __name__ == '__main__':
     create_default_roles()  # Asegura que existan los roles por defecto
     create_default_admin()  # Asegura que exista un administrador por defecto
-    app.run(host='0.0.0.0', port=5000)
+    app.run()
